@@ -2,6 +2,7 @@
 using Avalonia;
 
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using RedSismica.ViewModels;
 
@@ -21,5 +22,10 @@ public partial class VentanaCierreOrden : Window
         public required string FechaFinalizacion { get; set; }
         public required string NombreEstacion { get; set; }
         public required string NombreSismografo { get; set; }
+    }
+
+    private void BotonCancelar_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }
