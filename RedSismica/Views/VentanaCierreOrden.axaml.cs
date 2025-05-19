@@ -14,6 +14,19 @@ public partial class VentanaCierreOrden : Window
     {
         InitializeComponent();
         DataContext = new VentanaCierreViewModel();
+        
+        var screen = Screens.Primary;
+        if (screen != null)
+        {
+            var workingArea = screen.WorkingArea;
+            Width = workingArea.Width * 0.8;
+            Height = workingArea.Height * 0.8;
+        }
+        else
+        {
+            Width = 1024;
+            Height = 768;
+        }
     }
 
     public class OrdenInspeccionListadoItem

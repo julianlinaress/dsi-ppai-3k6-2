@@ -34,7 +34,7 @@
                       GridLinesVisibility="All"
                       BorderThickness="1" 
                       BorderBrush="Gray">
-            </DataGrid>
+			</DataGrid>
         </Grid>
     </DockPanel>
 </Window>
