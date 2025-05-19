@@ -30,8 +30,14 @@ public class GestorCierreOrdenInspeccion
         _ordenesInspeccion = new List<OrdenDeInspeccion>
         {
             new OrdenDeInspeccion(1, DateTime.Now.AddDays(-5), ri, estadoCompletado, estacion1),
-            new OrdenDeInspeccion(2, DateTime.Now.AddDays(-3), ri, estadoCompletado, estacion2),
-            new OrdenDeInspeccion(3, DateTime.Now.AddDays(-1), ri, estadoOtro, estacion1)
+            new OrdenDeInspeccion(2, DateTime.Now.AddDays(-7), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(3, DateTime.Now.AddDays(-12), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(4, DateTime.Now.AddDays(-23), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(5, DateTime.Now.AddDays(-54), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(6, DateTime.Now.AddDays(-2), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(7, DateTime.Now.AddDays(-3), ri, estadoCompletado, estacion1),
+            new OrdenDeInspeccion(8, DateTime.Now.AddDays(-3), ri, estadoCompletado, estacion2),
+            new OrdenDeInspeccion(9, DateTime.Now.AddDays(-1), ri, estadoOtro, estacion1)
         };
     }
 
