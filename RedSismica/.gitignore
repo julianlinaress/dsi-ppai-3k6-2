@@ -1,0 +1,42 @@
+﻿## Archivos y carpetas generados por Rider
+.idea/
+*.sln.iml
+
+## Archivos de compilación de .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Paquetes NuGet descargados
+*.nupkg
+*.snupkg
+packages/
+# Si usás `EnableNuGetPackageRestore`, ignorá este también:
+.nuget/
+
+## Archivos de publicación
+publish/
+AppPackages/
+*.appxupload
+*.appxsym
+*.appx
+*.msix
+*.msixupload
+
+## Archivos temporales del sistema
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+
+## Archivos de Avalonia específicos (si tenés diseño en XAML)
+*.g.cs
+*.g.i.cs
+
+# Ignorar archivos generados por dotnet watch o herramientas similares
+**/Properties/launchSettings.json

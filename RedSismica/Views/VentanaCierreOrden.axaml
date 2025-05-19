@@ -7,15 +7,34 @@
         x:Class="RedSismica.Views.VentanaCierreOrden"
         x:DataType="vm:VentanaCierreViewModel"
         Title="Órdenes de Inspección"
-        Width="800" Height="600" Padding="20"
+        Width="600" Height="400" 
         WindowStartupLocation="CenterScreen">
 
-    <StackPanel >
-        <TextBlock>Ordenes de Inspeccion</TextBlock>
-        <DataGrid ItemsSource="{Binding Ordenes}" 
-              AutoGenerateColumns="True" IsReadOnly="True" 
-              GridLinesVisibility="All"
-              BorderThickness="1" BorderBrush="Gray">
-        </DataGrid>
-    </StackPanel>
+    <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Bottom" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="20">
+            <Button Click="BotonCancelar_Click">Cancelar</Button>
+        </StackPanel>
+        
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Grid.Row="0" 
+                       Margin="0,0,0,10">Ordenes de Inspeccion</TextBlock>
+            
+            <DataGrid Grid.Row="1" 
+                      ItemsSource="{Binding Ordenes}" 
+                      AutoGenerateColumns="True" 
+                      IsReadOnly="True" 
+                      GridLinesVisibility="All"
+                      BorderThickness="1" 
+                      BorderBrush="Gray">
+			</DataGrid>
+        </Grid>
+    </DockPanel>
 </Window>
