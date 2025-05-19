@@ -1491,31 +1491,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\julia\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\usuario\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\julia\\RiderProjects\\RedSismica\\RedSismica\\RedSismica.csproj",
+      "projectUniqueName": "C:\\Users\\usuario\\Desktop\\Cosas_Varias\\CosasDeLaUniversidad\\MaterialDeEstudio\\4ºaño\\Diseño_de_Sistemas_de_Informacion\\PPAI\\programa\\dsi-ppai-3k6-2\\RedSismica\\RedSismica.csproj",
       "projectName": "RedSismica",
-      "projectPath": "C:\\Users\\julia\\RiderProjects\\RedSismica\\RedSismica\\RedSismica.csproj",
-      "packagesPath": "C:\\Users\\julia\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\julia\\RiderProjects\\RedSismica\\RedSismica\\obj\\",
+      "projectPath": "C:\\Users\\usuario\\Desktop\\Cosas_Varias\\CosasDeLaUniversidad\\MaterialDeEstudio\\4ºaño\\Diseño_de_Sistemas_de_Informacion\\PPAI\\programa\\dsi-ppai-3k6-2\\RedSismica\\RedSismica.csproj",
+      "packagesPath": "C:\\Users\\usuario\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\usuario\\Desktop\\Cosas_Varias\\CosasDeLaUniversidad\\MaterialDeEstudio\\4ºaño\\Diseño_de_Sistemas_de_Informacion\\PPAI\\programa\\dsi-ppai-3k6-2\\RedSismica\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\julia\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\usuario\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1534,7 +1527,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -1585,7 +1578,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
