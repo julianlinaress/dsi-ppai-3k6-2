@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using RedSismica.Models;
 using RedSismica.ViewModels;
 
 namespace RedSismica.Views;
@@ -41,5 +42,11 @@ public partial class VentanaCierreOrden : Window
     private void BotonCancelar_Click(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+    private void TomarSeleccionOrden(object? sender, RoutedEventArgs e)
+    {
+        if (OrdenesDataGrid.SelectedItem is not DatosOrdenInspeccion seleccion) return;
+        var vm = DataContext as VentanaCierreViewModel;
+        vm?.Gestor.ProcesarOrdenSeleccionada(seleccion, this);
     }
 }
