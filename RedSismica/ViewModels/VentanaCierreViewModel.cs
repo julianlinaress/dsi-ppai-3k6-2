@@ -12,8 +12,7 @@ public class VentanaCierreViewModel : ViewModelBase
     public VentanaCierreViewModel()
     {
         Gestor = new GestorCierreOrdenInspeccion();
-        var ordenesData =  Gestor.BuscarOrdenes();
+        var ordenesData =  Gestor.NuevoCierre();
         Ordenes = new ObservableCollection<DatosOrdenInspeccion>(ordenesData);
-        
     }
 }

@@ -60,13 +60,22 @@ public class GestorCierreOrdenInspeccion
         ];
     }
 
-    public List<DatosOrdenInspeccion> BuscarOrdenes()
+    public IOrderedEnumerable<DatosOrdenInspeccion> NuevoCierre()
     {
         var riLogueado = _sesion.obtenerRILogueado();
-        
+        var ordenes = BuscarOdenes(riLogueado);
+        return OrdenarPorFecha(ordenes);
+    }
+
+    private static IOrderedEnumerable<DatosOrdenInspeccion> OrdenarPorFecha(List<DatosOrdenInspeccion> ordenes)
+    {
+        return ordenes.OrderBy(o => o.FechaFinalizacion);
+    }
+
+    private List<DatosOrdenInspeccion> BuscarOdenes(Usuario riLogueado)
+    {
         return _ordenesDeInspeccion
             .Where(o => o.EsDeRI(riLogueado) && o.EsCompletamenteRealizada())
-            .OrderBy(o => o.FechaFinalizacion)
             .Select(o => o.ObtenerDatos())
             .ToList();
     }
