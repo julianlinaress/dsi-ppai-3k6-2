@@ -9,14 +9,16 @@ using Avalonia.Media;
 
 namespace RedSismica.Models;
 
+// Control.
 public class GestorCierreOrdenInspeccion
 {
+    // Atributos
     private readonly Sesion _sesion;
-   
     private List<MotivoTipo> _motivoTipos = [];
     private List<OrdenDeInspeccion> _ordenesDeInspeccion = [];
     private string? Observacion { get; set; }
     
+    // Constructor
     public GestorCierreOrdenInspeccion()
     {
         _sesion = new Sesion();
@@ -24,8 +26,9 @@ public class GestorCierreOrdenInspeccion
         InicializarDatosPrueba();
     }
 
+    // Metodos
     private void InicializarDatosPrueba()
-    {
+    { 
         var ri = _sesion.obtenerRILogueado();
         var estadoCompletado = new Estado("Completamente Realizada");
         var estadoOtro = new Estado("En Proceso");
@@ -36,13 +39,13 @@ public class GestorCierreOrdenInspeccion
         var estacion1 = new EstacionSismologica("Estación Norte", sismografo1);
         var estacion2 = new EstacionSismologica("Estación Sur", sismografo2);
 
-        _motivoTipos = new List<MotivoTipo>
-        {
+        _motivoTipos =
+        [
             new MotivoTipo("Reparacion"),
             new MotivoTipo("Renovacion"),
             new MotivoTipo("Cambio de Sismografo"),
             new MotivoTipo("Otro")
-        };        
+        ];        
         _ordenesDeInspeccion =
         [
             new OrdenDeInspeccion(1, DateTime.Now.AddDays(-5), ri, estadoCompletado, estacion1),
@@ -71,12 +74,22 @@ public class GestorCierreOrdenInspeccion
     public async Task ProcesarOrdenSeleccionada(DatosOrdenInspeccion orden, Window parentWindow)
     {
         var input = await PedirObservacion(parentWindow);
+        if (input == null)
+        {
+            return; // El usuario canceló/cerró la ventana, se cancela el metodo.
+        }
         Observacion = input;
         Debug.WriteLine($"Orden seleccionada: {orden.NumeroOrden}, observación: {input}");
-        
+
+        var motivosYComentarios = await PedirTipos(parentWindow);
+        if (motivosYComentarios == null)
+        {
+            return; // El usuario canceló/cerró la ventana, se cancela el metodo.
+        }
+        Debug.WriteLine($"Comentarios: {motivosYComentarios}");
     }
-    
-    private async Task<string> PedirObservacion(Window parent)
+
+    private async Task<string?> PedirObservacion(Window parent)
     {
         var textBox = new TextBox
         {
@@ -85,13 +98,20 @@ public class GestorCierreOrdenInspeccion
             AcceptsReturn = true
         };
 
+        var aceptarClicked = false; // Se usará para determinar si el botón aceptar fue presionado
         var button = new Button
         {
             Content = "Aceptar",
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
             Margin = new Thickness(0, 10, 0, 0),
             IsDefault = true,
+            IsEnabled = false // Deshabilitado inicialmente
         };
+
+        textBox.GetObservable(TextBox.TextProperty).Subscribe(text =>
+        {
+            button.IsEnabled = !string.IsNullOrWhiteSpace(text); // Habilitar solo si hay texto
+        });
 
         var panel = new StackPanel
         {
@@ -113,100 +133,125 @@ public class GestorCierreOrdenInspeccion
             Content = panel
         };
 
-        button.Click += (_, _) => dialog.Close();
+        button.Click += (_, _) =>
+        {
+            aceptarClicked = true; // Indicar que se aceptó
+            dialog.Close();
+        };
 
         await dialog.ShowDialog(parent);
 
-        return textBox.Text ?? "";
+        // Si no se presionó "Aceptar", devolver null
+        return aceptarClicked ? textBox.Text : null;
     }
     
-private async Task<Dictionary<string, string>> PedirTipos(Window parent)
-{
-    var panel = new StackPanel
+    private async Task<Dictionary<string, string>?> PedirTipos(Window parent)
     {
-        Margin = new Thickness(20),
-        Spacing = 10
-    };
-
-    // Diccionarios para mantener estado
-    var checkBoxes = new Dictionary<string, CheckBox>();
-    var commentBoxes = new Dictionary<string, TextBox>();
-
-    foreach (var motivo in _motivoTipos)
-    {
-        var motivoPanel = new StackPanel { Spacing = 5 };
-
-        var check = new CheckBox
+        var panel = new StackPanel
         {
-            Content = motivo.Descripcion
+            Margin = new Thickness(20),
+            Spacing = 10
+        };
+        var aceptarClicked = false; // Se usará para determinar si el botón aceptar fue presionado
+
+        // Diccionarios para mantener estado
+        var checkBoxes = new Dictionary<string, CheckBox>();
+        var commentBoxes = new Dictionary<string, TextBox>();
+
+        foreach (var motivo in _motivoTipos)
+        {
+            var motivoPanel = new StackPanel { Spacing = 5 };
+
+            var check = new CheckBox
+            {
+                Content = motivo.Descripcion
+            };
+
+            var comentario = new TextBox
+            {
+                IsEnabled = false,
+                Watermark = "Comentario...",
+                Height = 60,
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            // Habilitar el cuadro de texto solo cuando el motivo está seleccionado
+            check.IsCheckedChanged += (_, _) => comentario.IsEnabled = check.IsChecked == true;
+
+            motivoPanel.Children.Add(check);
+            motivoPanel.Children.Add(comentario);
+
+            panel.Children.Add(motivoPanel);
+
+            checkBoxes[motivo.Descripcion] = check;
+            commentBoxes[motivo.Descripcion] = comentario;
+        }
+
+        var aceptarButton = new Button
+        {
+            Content = "Aceptar",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            IsDefault = true,
+            Margin = new Thickness(0, 10, 0, 0),
+            IsEnabled = false // Inicialmente deshabilitado
         };
 
-        var comentario = new TextBox
+        // Función para verificar si al menos un CheckBox está seleccionado
+        void UpdateButtonIsEnabled()
         {
-            IsEnabled = false,
-            Watermark = "Comentario...",
-            Height = 60,
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap
+            aceptarButton.IsEnabled = checkBoxes.Values.Any(cb => cb.IsChecked == true);
+        }
+
+        // Suscribir cada CheckBox al evento IsCheckedChanged
+        foreach (var checkBox in checkBoxes.Values)
+        {
+            checkBox.IsCheckedChanged += (_, _) => UpdateButtonIsEnabled();
+        }
+
+        var dialog = new Window
+        {
+            Title = "Motivos",
+            Width = 400,
+            Height = 500,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new ScrollViewer
+            {
+                Content = new StackPanel
+                {
+                    Children =
+                    {
+                        panel,
+                        aceptarButton // Agregar el botón después de los motivos
+                    }
+                }
+            }
         };
 
-        // Cuando se selecciona el motivo, habilitar el input
-        check.IsCheckedChanged += (_, _) => comentario.IsEnabled = true;
-
-        motivoPanel.Children.Add(check);
-        motivoPanel.Children.Add(comentario);
-
-        panel.Children.Add(motivoPanel);
-
-        checkBoxes[motivo.Descripcion] = check;
-        commentBoxes[motivo.Descripcion] = comentario;
-    }
-
-    var aceptarButton = new Button
-    {
-        Content = "Aceptar",
-        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-        IsDefault = true,
-        Margin = new Thickness(0, 10, 0, 0)
-    };
-
-    var dialog = new Window
-    {
-        Title = "Motivos",
-        Width = 400,
-        Height = 500,
-        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        Content = new ScrollViewer
+        aceptarButton.Click += (_, _) =>
         {
-            Content = panel
-        }
-    };
+            aceptarClicked = true;
+            // Cierra el diálogo
+            dialog.Close();
+        };
 
-    aceptarButton.Click += (_, _) =>
-    {
-        // Cierra el diálogo
-        dialog.Close();
-    };
+        await dialog.ShowDialog(parent);
 
-    panel.Children.Add(aceptarButton);
+        // Obtener resultados seleccionados
+        var resultado = new Dictionary<string, string>();
 
-    await dialog.ShowDialog(parent);
-
-    // Obtener resultados seleccionados
-    var resultado = new Dictionary<string, string>();
-
-    foreach (var motivo in _motivoTipos)
-    {
-        var check = checkBoxes[motivo.Descripcion];
-        var comentario = commentBoxes[motivo.Descripcion];
-
-        if (check.IsChecked == true)
+        foreach (var motivo in _motivoTipos)
         {
-            resultado[motivo.Descripcion] = comentario.Text ?? "";
-        }
-    }
+            var check = checkBoxes[motivo.Descripcion];
+            var comentario = commentBoxes[motivo.Descripcion];
 
-    return resultado;
-}
+            if (check.IsChecked == true)
+            {
+                resultado[motivo.Descripcion] = comentario.Text ?? "";
+            }
+        }
+
+        return aceptarClicked ? resultado : null;
+    }
 
 }
