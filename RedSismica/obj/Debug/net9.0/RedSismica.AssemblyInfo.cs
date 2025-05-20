@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RedSismica")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3610bac7c2241cf596eb3fcb4e687ec7314bb3a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8c4a52541f3554ee06fbcdd7efdaf0d96059a69b")]
 [assembly: System.Reflection.AssemblyProductAttribute("RedSismica")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RedSismica")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
