@@ -26,31 +26,40 @@
             
             <TextBlock Grid.Row="0" 
                        Margin="0,0,0,10">Ordenes de Inspeccion</TextBlock>
-
-			<DataGrid Grid.Row="1"
-          ItemsSource="{Binding Ordenes}"
-          AutoGenerateColumns="False"
-          IsReadOnly="True"
-          GridLinesVisibility="All"
-          BorderThickness="1"
-          BorderBrush="Gray">
-				<!-- en esta seccion se realiza la estructura de la tabla-->
-				    <DataGrid.Columns>
-						<!-- se definen las columnas de la tabla-->
-					    <DataGridTextColumn Header="N° Orden" Binding="{Binding NumeroOrden}" />
-					    <DataGridTextColumn Header="Fecha Finalización" Binding="{Binding FechaFinalizacion}" />
-					    <DataGridTextColumn Header="Estación" Binding="{Binding NombreEstacion}" />
-					    <DataGridTextColumn Header="Sismógrafo" Binding="{Binding NombreSismografo}" />
-						<!--<DataGridTemplateColumn Header="Acción"> nos permite poner un botom en vez de un dato -->
-						<DataGridTemplateColumn Header="Acción">
-						    <DataGridTemplateColumn.CellTemplate>
-							    <DataTemplate>
-								    <Button Content="Cerrar" Command="" CommandParameter="{Binding}" />
-							    </DataTemplate>
-						    </DataGridTemplateColumn.CellTemplate>
-					    </DataGridTemplateColumn>
-				    </DataGrid.Columns>
-			</DataGrid>
+            
+            <DataGrid Grid.Row="1" 
+                      x:Name="OrdenesDataGrid"
+                      ItemsSource="{Binding Ordenes}" 
+                      AutoGenerateColumns="True" 
+                      IsReadOnly="True" 
+                      GridLinesVisibility="All"
+                      BorderThickness="1" 
+                      SelectionMode="Single"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="True"
+                      SelectionChanged="TomarSeleccionOrden"
+                      CanUserSortColumns="True">
+            <DataGrid.Styles>
+                <!-- Estilo base para las filas -->
+                <Style Selector="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+                
+                <!-- Estilo para las filas seleccionadas -->
+                <Style Selector="DataGridRow:selected">
+                    <Setter Property="Background" Value="#4287f5"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Style>
+                                
+                <Style Selector="DataGridRow:pointerover">
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Style>
+                <!-- Prioridad para hover en filas no seleccionadas -->
+                <Style Selector="DataGridRow:pointerover:not(:selected)">
+                    <Setter Property="Background" Value="#1F007ACC"/>
+                </Style>
+            </DataGrid.Styles>
+            </DataGrid>
         </Grid>
     </DockPanel>
 </Window>

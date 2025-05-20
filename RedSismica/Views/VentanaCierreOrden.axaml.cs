@@ -37,7 +37,6 @@ public partial class VentanaCierreOrden : Window
         public required string NombreEstacion { get; set; }
         public required string NombreSismografo { get; set; }
     }
-    
 
     private void BotonCancelar_Click(object? sender, RoutedEventArgs e)
     {
