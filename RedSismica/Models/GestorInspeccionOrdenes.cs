@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using RedSismica.ViewModels;
 
 namespace RedSismica.Models;
 
@@ -17,6 +18,7 @@ public class GestorCierreOrdenInspeccion
     private List<MotivoTipo> _motivoTipos = [];
     private List<OrdenDeInspeccion> _ordenesDeInspeccion = [];
     private string? Observacion { get; set; }
+    private VentanaCierreViewModel? _boundary;
     
     // Constructor
     public GestorCierreOrdenInspeccion()
@@ -59,12 +61,14 @@ public class GestorCierreOrdenInspeccion
             new OrdenDeInspeccion(9, DateTime.Now.AddDays(-1), ri, estadoOtro, estacion1)
         ];
     }
-
-    public IOrderedEnumerable<DatosOrdenInspeccion> NuevoCierre()
+    
+    public void NuevoCierre(VentanaCierreViewModel ventana)
     {
+        _boundary = ventana;
         var riLogueado = _sesion.obtenerRILogueado();
         var ordenes = BuscarOdenes(riLogueado);
-        return OrdenarPorFecha(ordenes);
+        var ordenesPorFecha = OrdenarPorFecha(ordenes);
+        _boundary.MostrarOrdenesParaSeleccion(ordenesPorFecha);
     }
 
     private static IOrderedEnumerable<DatosOrdenInspeccion> OrdenarPorFecha(List<DatosOrdenInspeccion> ordenes)
