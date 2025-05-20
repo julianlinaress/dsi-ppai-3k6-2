@@ -5,9 +5,14 @@ using RedSismica.Models;
 
 public class GestorCierreOrdenInspeccion
 {
+
+    // Esta es la clase de gestor que maneja el cierre de las ordenes de inspección.
+
+    /// Atributos
     private readonly Sesion _sesion;
     private List<OrdenDeInspeccion> _ordenesInspeccion;
 
+    /// Constructor
     public GestorCierreOrdenInspeccion()
     {
         _sesion = new Sesion();
@@ -15,6 +20,7 @@ public class GestorCierreOrdenInspeccion
         InicializarDatosPrueba();
     }
 
+    /// Constructor para pruebas unitarias, se agregan los datos de prueba
     private void InicializarDatosPrueba()
     {
         var ri = _sesion.obtenerRILogueado();
@@ -40,6 +46,8 @@ public class GestorCierreOrdenInspeccion
             new OrdenDeInspeccion(9, DateTime.Now.AddDays(-1), ri, estadoOtro, estacion1)
         };
     }
+
+    /// Método para buscar las ordenes de inspección que están completamente realizadas
 
     public List<DatosOrdenInspeccion> BuscarOrdenes()
     {

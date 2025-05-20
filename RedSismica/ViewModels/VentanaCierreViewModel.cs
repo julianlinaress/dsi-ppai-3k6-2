@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿// En este archivo se implementa la funcionalidades de la ventana de cierre de ordenes de inspección.
+// que se abre despues de que se haga clik en el botón "Registrar Cierre".
+using System.Diagnostics;
 using RedSismica.Views;
 using RedSismica.Models;
 
