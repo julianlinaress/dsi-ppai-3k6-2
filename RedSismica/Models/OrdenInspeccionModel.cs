@@ -1,27 +1,21 @@
 ﻿using System;
-using RedSismica.Models;
 
 namespace RedSismica.Models;
 
-public class OrdenDeInspeccion
+public class OrdenDeInspeccion(
+    int numeroOrden,
+    DateTime fechaFinalizacion,
+    Usuario responsableInspeccion,
+    Estado estado,
+    EstacionSismologica estacion)
 {
-    public int NumeroOrden { get; private set; }
-    public DateTime FechaFinalizacion { get; private set; }
-    public Usuario ResponsableInspeccion { get; private set; }
-    public Estado Estado { get; private set; }
-    public EstacionSismologica Estacion { get; private set; }
+    private int NumeroOrden { get; set; } = numeroOrden;
+    private DateTime FechaFinalizacion { get; set; } = fechaFinalizacion;
+    private Usuario ResponsableInspeccion { get; set; } = responsableInspeccion;
+    private Estado Estado { get; set; } = estado;
+    private EstacionSismologica Estacion { get; set; } = estacion;
 
-    public OrdenDeInspeccion(int numeroOrden, DateTime fechaFinalizacion, 
-        Usuario responsableInspeccion, Estado estado, EstacionSismologica estacion)
-    {
-        NumeroOrden = numeroOrden;
-        FechaFinalizacion = fechaFinalizacion;
-        ResponsableInspeccion = responsableInspeccion;
-        Estado = estado;
-        Estacion = estacion;
-    }
-
-    public bool EsDeRI(Usuario ri)
+    public bool EsDeRi(Usuario ri)
     {
         return ResponsableInspeccion.Id == ri.Id;
     }
@@ -45,8 +39,8 @@ public class OrdenDeInspeccion
 
 public class DatosOrdenInspeccion
 {
-    public int NumeroOrden { get; set; }
-    public DateTime FechaFinalizacion { get; set; }
+    public int NumeroOrden { get; init; }
+    public DateTime FechaFinalizacion { get; init; }
     public required string  NombreEstacion { get; set; }
     public required string NombreSismografo { get; set; }
 }

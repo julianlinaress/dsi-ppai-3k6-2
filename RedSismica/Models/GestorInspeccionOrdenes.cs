@@ -78,10 +78,9 @@ public class GestorCierreOrdenInspeccion
 
     private List<DatosOrdenInspeccion> BuscarOdenes(Usuario riLogueado)
     {
-        return _ordenesDeInspeccion
-            .Where(o => o.EsDeRI(riLogueado) && o.EsCompletamenteRealizada())
-            .Select(o => o.ObtenerDatos())
-            .ToList();
+        return [.. _ordenesDeInspeccion
+            .Where(o => o.EsDeRi(riLogueado) && o.EsCompletamenteRealizada())
+            .Select(o => o.ObtenerDatos())];
     }
     
     public async Task ProcesarOrdenSeleccionada(DatosOrdenInspeccion orden, Window parentWindow)
