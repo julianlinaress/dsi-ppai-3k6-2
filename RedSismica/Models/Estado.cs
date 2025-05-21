@@ -1,13 +1,8 @@
 ﻿namespace RedSismica.Models;
 
-public class Estado
+public class Estado(string nombre)
 {
-    public string Nombre { get; private set; }
-
-    public Estado(string nombre)
-    {
-        Nombre = nombre;
-    }
+    private string Nombre { get; set; } = nombre;
 
     public bool EsCompletamenteRealizada()
     {

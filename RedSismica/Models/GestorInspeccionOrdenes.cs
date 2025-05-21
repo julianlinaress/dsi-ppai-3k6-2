@@ -92,7 +92,7 @@ public class GestorCierreOrdenInspeccion
             return; // El usuario canceló/cerró la ventana, se cancela el metodo.
         }
         Observacion = input;
-        Debug.WriteLine($"Orden seleccionada: {orden.NumeroOrden}, observación: {input}");
+        Debug.WriteLine($"Orden seleccionada: {orden.NumeroOrden}, observación: {Observacion}");
 
         var motivosYComentarios = await PedirTipos(parentWindow);
         if (motivosYComentarios == null)
