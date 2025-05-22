@@ -14,14 +14,19 @@ public class OrdenDeInspeccion(
     private DateTime FechaFinalizacion { get; set; } = fechaFinalizacion;
     private DateTime? FechaHoraCierre { get; set; }
     private Usuario? ResponsableInspeccion { get; set; } = responsableInspeccion;
-    private Estado Estado { get; set; } = estado;
-    private EstacionSismologica Estacion { get; set; } = estacion;
+    public Estado Estado { get; set; } = estado;
+    public EstacionSismologica Estacion { get; set; } = estacion;
 
     public bool EsDeRi(Usuario ri)
     {
         return ResponsableInspeccion?.Id == ri.Id;
     }
 
+    // public CambioEstado ObtenerCambioEstadoActual()
+    // {
+    //     
+    // }
+    //
     public void Cerrar(Estado estado, DateTime fechaHoraCierre)
     {
         FechaHoraCierre = fechaHoraCierre;

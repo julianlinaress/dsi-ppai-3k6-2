@@ -37,7 +37,8 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
     {
         InitializeComponent();
         DataContext = this;
-        Gestor = new GestorCierreOrdenInspeccion();
+        if (Program.BaseDeDatosMock == null) return;
+        Gestor = new GestorCierreOrdenInspeccion(Program.BaseDeDatosMock, this);
         Gestor.NuevoCierre(this);
         
         var screen = Screens.Primary;
