@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RedSismica.Models;
 
-public class CambioEstado(DateTime fechaHoraInicio, Estado estado)
+public class CambioEstado(DateTime fechaHoraInicio, Estado estado, Dictionary<MotivoTipo, string> motivosFueraServicio)
 {
     private DateTime FechaHoraInicio { get; set; } = fechaHoraInicio;
+
+    public Dictionary<MotivoTipo, string> MotivosFueraServicio { get; set; } = motivosFueraServicio;
     public Estado Estado { get; set; } = estado;
     public DateTime? FechaHoraFin { get; set; }
 

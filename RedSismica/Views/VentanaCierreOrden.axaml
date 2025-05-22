@@ -1,6 +1,5 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:RedSismica.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:RedSismica.Views"
@@ -18,18 +17,21 @@
                     Margin="20">
             <Button Click="BotonCancelar_Click">Cancelar</Button>
         </StackPanel>
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
+        <Grid Margin="20" RowDefinitions="Auto,*" Name="GrillaOrdenesDeInspeccion">
             <TextBlock Grid.Row="0" 
                        Margin="0,0,0,10">Ordenes de Inspeccion</TextBlock>
+            <TextBlock x:Name="MensajeTextBlock"
+                       Grid.Row="1"
+                       Text=""
+                       IsVisible="False"
+                       FontSize="18"
+                       Foreground="Gray"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center" />
             
             <DataGrid Grid.Row="1" 
                       x:Name="OrdenesDataGrid"
-                      ItemsSource="{Binding Ordenes}" 
                       AutoGenerateColumns="True" 
                       IsReadOnly="True" 
                       GridLinesVisibility="All"
@@ -39,7 +41,8 @@
                       CanUserResizeColumns="True"
                       SelectionChanged="TomarSeleccionOrden"
                       CanUserSortColumns="True">
-            <DataGrid.Styles>
+
+                <DataGrid.Styles>
                 <!-- Estilo base para las filas -->
                 <Style Selector="DataGridRow">
                     <Setter Property="Background" Value="Transparent"/>

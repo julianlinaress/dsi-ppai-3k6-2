@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Media;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -16,27 +16,12 @@ using RedSismica.ViewModels;
 
 namespace RedSismica.Views;
 
-public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
+public partial class VentanaCierreOrden : Window
 {
-    private ObservableCollection<DatosOrdenInspeccion> _ordenes;
-    public ObservableCollection<DatosOrdenInspeccion> Ordenes
-    {
-        get => _ordenes;
-        set
-        {
-            _ordenes = value;
-            OnPropertyChanged(nameof(Ordenes));
-        }
-    }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged(string propertyName) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    private GestorCierreOrdenInspeccion Gestor { get; set; }
+    private GestorCierreOrdenInspeccion? Gestor { get; set; }
     public VentanaCierreOrden()
     {
         InitializeComponent();
-        DataContext = this;
         if (Program.BaseDeDatosMock == null) return;
         Gestor = new GestorCierreOrdenInspeccion(Program.BaseDeDatosMock, this);
         Gestor.NuevoCierre(this);
@@ -63,16 +48,21 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
     private void TomarSeleccionOrden(object? sender, RoutedEventArgs e)
     {
         if (OrdenesDataGrid.SelectedItem is not DatosOrdenInspeccion seleccion) return;
-        Gestor.TomarSeleccionOrden(seleccion);
+        Gestor?.TomarSeleccionOrden(seleccion);
     }
 
-    public static void MostrarMensaje(string mensaje)
+    public void MostrarMensaje(string mensaje)
     {
-        Debug.WriteLine(mensaje);
+        OrdenesDataGrid.IsVisible = false;
+        MensajeTextBlock.Text = mensaje;
+        MensajeTextBlock.IsVisible = true;
     }
+
+
     public void MostrarOrdenesParaSeleccion(IOrderedEnumerable<DatosOrdenInspeccion> ordenesData)
     {
-        Ordenes = new ObservableCollection<DatosOrdenInspeccion>(ordenesData);
+        OrdenesDataGrid.ItemsSource = ordenesData;
+        // Ordenes = new ObservableCollection<DatosOrdenInspeccion>(ordenesData);
     }
     
     public async Task PedirConfirmacion()
@@ -84,7 +74,7 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
         var result = await box.ShowAsync();
         if (result == ButtonResult.Ok)
         {
-            Gestor.TomarConfirmacionCierre();
+            Gestor?.TomarConfirmacionCierre();
         }
         
     }
@@ -141,7 +131,7 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
         await dialog.ShowDialog(this);
         if (!aceptarClicked || string.IsNullOrEmpty(textBox.Text)) return;
         // Si no se presionó "Aceptar", devolver null
-        Gestor.TomarObservacion(textBox.Text);
+        Gestor?.TomarObservacion(textBox.Text);
     }
     
         
@@ -232,7 +222,7 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
         await dialog.ShowDialog(this);
 
         // Obtener resultados seleccionados
-        var resultado = new Dictionary<string, string>();
+        var resultado = new Dictionary<MotivoTipo, string>();
 
         foreach (var motivo in motivoTipos)
         {
@@ -241,12 +231,12 @@ public partial class VentanaCierreOrden : Window, INotifyPropertyChanged
 
             if (check.IsChecked == true)
             {
-                resultado[motivo.Descripcion] = comentario.Text ?? "";
+                resultado[motivo] = comentario.Text ?? "";
             }
         }
 
         if (aceptarClicked) {
-            Gestor.TomarTipos(resultado);
+            Gestor?.TomarTipos(resultado);
         }
 
         return;

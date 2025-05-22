@@ -1,5 +1,4 @@
 ﻿using System;
-using Avalonia.Controls.Notifications;
 
 namespace RedSismica.Models;
 
@@ -14,7 +13,7 @@ public class OrdenDeInspeccion(
     private DateTime FechaFinalizacion { get; set; } = fechaFinalizacion;
     private DateTime? FechaHoraCierre { get; set; }
     private Usuario? ResponsableInspeccion { get; set; } = responsableInspeccion;
-    public Estado Estado { get; set; } = estado;
+    private Estado Estado { get; set; } = estado;
     public EstacionSismologica Estacion { get; set; } = estacion;
 
     public bool EsDeRi(Usuario ri)
@@ -22,20 +21,10 @@ public class OrdenDeInspeccion(
         return ResponsableInspeccion?.Id == ri.Id;
     }
 
-    // public CambioEstado ObtenerCambioEstadoActual()
-    // {
-    //     
-    // }
-    //
     public void Cerrar(Estado estado, DateTime fechaHoraCierre)
     {
         FechaHoraCierre = fechaHoraCierre;
         Estado = estado;
-        // var messageBox = new WindowNotificationManager()
-        // {
-        //     Position = NotificationPosition.TopRight
-        // };
-        // messageBox.Show(new Notification("Exito", "Orden de inspeccion cerrada con exito", NotificationType.Success));
     }
 
     public bool EsCompletamenteRealizada()
@@ -47,10 +36,10 @@ public class OrdenDeInspeccion(
     {
         return new DatosOrdenInspeccion
         {
-            NumeroOrden = this.NumeroOrden,
-            FechaFinalizacion = this.FechaFinalizacion,
-            NombreEstacion = this.Estacion.Nombre,
-            NombreSismografo = this.Estacion.Sismografo.Nombre
+            NumeroOrden = NumeroOrden,
+            FechaFinalizacion = FechaFinalizacion,
+            NombreEstacion = Estacion.Nombre,
+            NombreSismografo = Estacion.Sismografo.Nombre
         };
     }
 }

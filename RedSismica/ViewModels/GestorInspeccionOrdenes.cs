@@ -5,16 +5,13 @@ using System.Linq;
 using RedSismica.Models;
 using RedSismica.Views;
 
-using System.Net;
-using System.Net.Mail;
-
 namespace RedSismica.ViewModels;
 
 public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCierreOrden boundary) : ViewModelBase
 {
     // Atributos
     // public string? Mensaje { get; set; }
-    private Dictionary<string, string> MotivosYComentarios { get; set; } = new();
+    private Dictionary<MotivoTipo, string> MotivosYComentarios { get; set; } = new();
 
     private readonly Sesion? _sesion = SesionManager.SesionActual;
     private string? Observacion { get; set; }
@@ -32,7 +29,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         var ordenes = BuscarOdenes(riLogueado);
         if (ordenes.Count == 0)
         {
-            VentanaCierreOrden.MostrarMensaje("No se encontraron ordenes completamente realizadas para su usuario");
+            _boundary.MostrarMensaje("No se encontraron ordenes completamente realizadas para su usuario");
             return;
         }
         var ordenesPorFecha = OrdenarPorFecha(ordenes);
@@ -58,7 +55,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         _ = _boundary.PedirObservacion();
     }
 
-    public void TomarTipos(Dictionary<string, string> motivosYComentarios)
+    public void TomarTipos(Dictionary<MotivoTipo, string> motivosYComentarios)
     {
         MotivosYComentarios = motivosYComentarios;
         _ = _boundary.PedirConfirmacion();
@@ -73,7 +70,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     }
 
 
-    private static bool ValidarDatosCierre(string? observacion, Dictionary<string, string> motivosYComentarios)
+    private static bool ValidarDatosCierre(string? observacion, Dictionary<MotivoTipo, string> motivosYComentarios)
     {
         return !string.IsNullOrEmpty(observacion) && motivosYComentarios.Count > 0;
     }
@@ -81,86 +78,82 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     {
         var fechaActual = DateTime.Now;
         Debug.WriteLine("Validando datos de cierre...");
+        if (OrdenSeleccionada == null) return; 
         var datosValidos = ValidarDatosCierre(Observacion, MotivosYComentarios);
         if (!datosValidos) return;
         Debug.WriteLine("Buscando estado de cierre...");
         EstadoCierre = BuscarEstadoCierre();
         if (EstadoCierre == null) return;
         Debug.WriteLine("Cerrando orden...");
-        OrdenSeleccionada?.Cerrar(EstadoCierre, fechaActual);
-        Debug.WriteLine("Poniendo sismografo fuera de servicio...");
+        OrdenSeleccionada.Cerrar(EstadoCierre, fechaActual);
+        Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
+        Debug.WriteLine("Obteniendo estado fuera de servicio...");
         var estadoFueraDeServicioSismografo = ObtenerEstadoFueraDeServicioSismografo();
         if (estadoFueraDeServicioSismografo == null) return;
-        PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo);
-        var riLogueado = _sesion?.ObtenerRILogueado();
-
-        Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
+        Debug.WriteLine("Estado encontrado, actualizando sismógrafo...");
+        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+        var nroIdentificadorSismografo = OrdenSeleccionada?.Estacion.Sismografo.IdentificadorSismografo;
+        Debug.WriteLine("Sismografo actualizado, enviando mails...");
         Debug.WriteLine("Buscando mails de responsables de inspeccion...");
-
         var mails = ObtenerResponsablesDeInspeccion();
         if (mails.Count > 0)
         {
             Debug.WriteLine("Enviando mails...");
-            EnviarEmails(mails, estadoFueraDeServicioSismografo.Nombre, fechaActual);
+            EnviarEmails(mails, estadoFueraDeServicioSismografo.Nombre, fechaActual, nroIdentificadorSismografo);
         }
-
+        else
+        {
+            Debug.WriteLine("No se encontraron mails de responsables de inspeccion...");
+        }
+        var riLogueado = _sesion?.ObtenerRILogueado();
         if (riLogueado == null) return;
         var ordenes = BuscarOdenes(riLogueado);
         if (ordenes.Count == 0)
         {
-            VentanaCierreOrden.MostrarMensaje("No se encontraron ordenes completamente realizadas para su usuario");
+            _boundary.MostrarMensaje("No se encontraron ordenes completamente realizadas para su usuario");
             return;
         }
         var ordenesPorFecha = OrdenarPorFecha(ordenes);
-
-        Debug.WriteLine(OrdenSeleccionada);
         _boundary.MostrarOrdenesParaSeleccion(ordenesPorFecha);
     }
 
-    private void EnviarEmails(List<string?> mails, string nombreEstadoFueraServicio, DateTime fechaHoraCambioEstado)
+    private void EnviarEmails(
+        List<string?> mails, 
+        string nombreEstadoFueraServicio, 
+        DateTime fechaHoraCambioEstado, 
+        int? nroIdentificadorSismografo)
     {
-        var identificacion = OrdenSeleccionada?.NumeroOrden.ToString();
-        var mensaje = $"Identificación: {identificacion}\n" +
-                         $"Estado: {nombreEstadoFueraServicio}\n" +
-                         $"Fecha y Hora: {fechaHoraCambioEstado}\n" +
-                         $"Motivos y Comentarios: {FormatearMotivosYComentarios(MotivosYComentarios)}";
+        var mensaje = 
+            $"Nro. ID Sismógrafo: {nroIdentificadorSismografo.ToString()}\n" + 
+            $"Estado: {nombreEstadoFueraServicio}\n" + 
+            $"Fecha y Hora: {fechaHoraCambioEstado}\n" + 
+            $"Motivos y Comentarios: {FormatearMotivosYComentarios(MotivosYComentarios)}";
 
-        EnviarMailGmail("gaston.blangino.23@gmail.com", "Cierre de Orden de Inspección", mensaje);
-        //               mail donde se envia el mensaje, el ausnto del mail, y el mensaje
+        foreach (var mail in mails)
+        {
+            if (string.IsNullOrEmpty(mail)) return;
+            InterfazEmail.EnviarEmails(mail, "Cierre de Orden de Inspección", mensaje);
+        }
     }
 
 
     private List<string?> ObtenerResponsablesDeInspeccion()
     {
         return baseDeDatos.Empleados
-            .Where(e => e.EsResponsableDeInspeccion())
+            .Where(e => e.EsResponsableDeInspeccion() && !string.IsNullOrEmpty(e.Mail))
             .Select(e => e.Mail)
             .ToList();
     }
 
-    private string FormatearMotivosYComentarios(Dictionary<string, string> motivosYComentarios)
+    private static string FormatearMotivosYComentarios(Dictionary<MotivoTipo, string> motivosYComentarios)
     {
         if (motivosYComentarios.Count == 0)
             return "Sin motivos ni comentarios.";
 
         return string.Join("\n", motivosYComentarios.Select(kvp =>
-            $"{kvp.Key}: {kvp.Value}"));
+            $"{kvp.Key.Descripcion}: {kvp.Value}"));
     }
 
-
-    private void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo)
-    {
-        var fechaHoraActual = DateTime.Now;
-        var cambioEstadoActual = OrdenSeleccionada?.Estacion.ObtenerCambioEstadoActual();
-        if (cambioEstadoActual == null) return;
-        cambioEstadoActual.FechaHoraFin = DateTime.Now;
-
-        if (OrdenSeleccionada == null || EstadoCierre == null) return;
-        OrdenSeleccionada.Estado = EstadoCierre;
-        OrdenSeleccionada.Estacion.Sismografo.Estado = estadoFueraDeServicioSismografo;
-        OrdenSeleccionada.Estacion.Sismografo.CambioEstado =
-            new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo);
-    }
 
     private Estado? BuscarEstadoCierre()
     {
@@ -172,32 +165,4 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     {
         return baseDeDatos.Estados.Find(o => o.EsAmbitoSismografo() && o.EsFueraDeServicio());
     }
-
-
-    public void EnviarMailGmail(string destinatario, string asunto, string cuerpo)
-    {
-        var remitente = "redsismicadsi@gmail.com"; //no tocar
-        var password = "bzpr pexq nggv tpby";   // no tocar
-        //mostrar por consola 
-
-        var smtp = new SmtpClient("smtp.gmail.com")
-        {
-            Port = 587,
-            Credentials = new NetworkCredential(remitente, password),
-            EnableSsl = true,
-        };
-
-        var mensaje = new MailMessage(remitente, destinatario, asunto, cuerpo);
-
-        try
-        {
-            smtp.Send(mensaje);
-            Console.WriteLine("Correo enviado correctamente.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error al enviar el correo: {ex.Message}");
-        }
-    }
-
 }

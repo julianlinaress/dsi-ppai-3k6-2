@@ -36,11 +36,8 @@ public class Program
         
         List<Empleado> empleados =
         [
-            new("Juan", "Linares", "12345678", "juan@empresa.com", rol1),
-            new("Maria", "Perez", "87654321", "maria@empresa.com", rol1),
-            new("Carlos", "Gomez", "98765432", "carlos@empresa.com", rol1), 
-            new("Ana", "Martinez", "23456789", "ana@empresa.com", rol2),
-            new("Pedro", "Rodriguez", "34567890", "pedro@empresa.com", rol2)
+            new("Julian", "Linares", "12345678", "julian@linares.com.ar", rol1),
+            new("Julian", "Linares", "12345678", "julianlinares2003@gmail.com", rol2),
         ];
 
             

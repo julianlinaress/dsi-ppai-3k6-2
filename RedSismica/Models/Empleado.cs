@@ -6,7 +6,7 @@ public class Empleado(string nombre, string apellido, string telefono, string ma
     public string? Mail { get; set; } = mail;
     public string? Nombre { get; set; } = nombre;
     public string? Telefono { get; set; } = telefono;
-    public Rol? Rol { get; set; } = rol;
+    private Rol? Rol { get; set; } = rol;
 
     public bool EsResponsableDeInspeccion()
     {
