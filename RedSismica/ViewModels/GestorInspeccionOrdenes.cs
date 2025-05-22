@@ -5,6 +5,9 @@ using System.Linq;
 using RedSismica.Models;
 using RedSismica.Views;
 
+using System.Net;
+using System.Net.Mail;
+
 namespace RedSismica.ViewModels;
 
 public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCierreOrden boundary) : ViewModelBase
@@ -12,15 +15,15 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     // Atributos
     // public string? Mensaje { get; set; }
     private Dictionary<string, string> MotivosYComentarios { get; set; } = new();
-    
+
     private readonly Sesion? _sesion = SesionManager.SesionActual;
     private string? Observacion { get; set; }
     private OrdenDeInspeccion? OrdenSeleccionada { get; set; }
     private Estado? EstadoCierre { get; set; }
     private VentanaCierreOrden _boundary = boundary;
-    
+
     // Metodos
-    
+
     public void NuevoCierre(VentanaCierreOrden ventana)
     {
         _boundary = ventana;
@@ -47,7 +50,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             .Where(o => o.EsDeRi(riLogueado) && o.EsCompletamenteRealizada())
             .Select(o => o.ObtenerDatos())];
     }
-    
+
     public void TomarSeleccionOrden(DatosOrdenInspeccion orden)
     {
         var ordenSeleccionada = baseDeDatos.OrdenesDeInspeccion.Find(o => orden.NumeroOrden == o.NumeroOrden);
@@ -65,7 +68,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     {
         Observacion = observacion;
         var motivotipos = baseDeDatos.MotivosTipos;
-   
+
         _ = _boundary.PedirTipos(motivotipos);
     }
 
@@ -90,7 +93,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         if (estadoFueraDeServicioSismografo == null) return;
         PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo);
         var riLogueado = _sesion?.ObtenerRILogueado();
-        
+
         Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
         Debug.WriteLine("Buscando mails de responsables de inspeccion...");
 
@@ -100,7 +103,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             Debug.WriteLine("Enviando mails...");
             EnviarEmails(mails, estadoFueraDeServicioSismografo.Nombre, fechaActual);
         }
-        
+
         if (riLogueado == null) return;
         var ordenes = BuscarOdenes(riLogueado);
         if (ordenes.Count == 0)
@@ -109,7 +112,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             return;
         }
         var ordenesPorFecha = OrdenarPorFecha(ordenes);
-        
+
         Debug.WriteLine(OrdenSeleccionada);
         _boundary.MostrarOrdenesParaSeleccion(ordenesPorFecha);
     }
@@ -122,13 +125,8 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
                          $"Fecha y Hora: {fechaHoraCambioEstado}\n" +
                          $"Motivos y Comentarios: {FormatearMotivosYComentarios(MotivosYComentarios)}";
 
-        foreach (var mail in mails.Where(m => !string.IsNullOrWhiteSpace(m)))
-        {
-            Console.WriteLine($"Enviando email a: {mail}");
-            Console.WriteLine("Contenido:");
-            Console.WriteLine(mensaje);
-            Console.WriteLine("--------");
-        }
+        EnviarMailGmail("gaston.blangino.23@gmail.com", "Cierre de Orden de Inspección", mensaje);
+        //               mail donde se envia el mensaje, el ausnto del mail, y el mensaje
     }
 
 
@@ -139,7 +137,7 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             .Select(e => e.Mail)
             .ToList();
     }
-    
+
     private string FormatearMotivosYComentarios(Dictionary<string, string> motivosYComentarios)
     {
         if (motivosYComentarios.Count == 0)
@@ -148,8 +146,8 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         return string.Join("\n", motivosYComentarios.Select(kvp =>
             $"{kvp.Key}: {kvp.Value}"));
     }
-    
-    
+
+
     private void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo)
     {
         var fechaHoraActual = DateTime.Now;
@@ -163,15 +161,43 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         OrdenSeleccionada.Estacion.Sismografo.CambioEstado =
             new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo);
     }
-    
+
     private Estado? BuscarEstadoCierre()
     {
         var estados = baseDeDatos.Estados;
         return estados.Find(o => o.EsAmbitoOrdenInspeccion() && o.EsCerrada());
     }
-    
+
     private Estado? ObtenerEstadoFueraDeServicioSismografo()
     {
         return baseDeDatos.Estados.Find(o => o.EsAmbitoSismografo() && o.EsFueraDeServicio());
     }
+
+
+    public void EnviarMailGmail(string destinatario, string asunto, string cuerpo)
+    {
+        var remitente = "redsismicadsi@gmail.com"; //no tocar
+        var password = "bzpr pexq nggv tpby";   // no tocar
+        //mostrar por consola 
+
+        var smtp = new SmtpClient("smtp.gmail.com")
+        {
+            Port = 587,
+            Credentials = new NetworkCredential(remitente, password),
+            EnableSsl = true,
+        };
+
+        var mensaje = new MailMessage(remitente, destinatario, asunto, cuerpo);
+
+        try
+        {
+            smtp.Send(mensaje);
+            Console.WriteLine("Correo enviado correctamente.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al enviar el correo: {ex.Message}");
+        }
+    }
+
 }
