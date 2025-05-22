@@ -27,17 +27,20 @@ public class Program
             new("Cerrada", "Orden de Inspección"),
         ];
 
-        var rol1 = new Rol("Responsable de Inspección");
+        var ri = new Rol("Responsable de Inspección");
         var rol2 = new Rol("Otro");
         List<Rol> roles = [
-            rol1,
+            ri,
             rol2
         ];
         
         List<Empleado> empleados =
         [
-            new("Julian", "Linares", "12345678", "julian@linares.com.ar", rol1),
-            new("Julian", "Linares", "12345678", "julianlinares2003@gmail.com", rol2),
+            new("Julian", "Linares", "12345678", "julian@linares.com.ar", ri),
+            // new("Mauro", "Bastasini", "12345678", "maurobastasiniprof@gmail.com", ri),
+            // new("Inés", "Haefeli", "12345678", "ineshaefeli@gmail.com", ri),
+            // new("Huenu", "Capdevila", "12345678", "huecap7@gmail.com", ri),
+            // new("Julian", "Linares", "12345678", "julianlinares2003@gmail.com", rol2),
         ];
 
             
