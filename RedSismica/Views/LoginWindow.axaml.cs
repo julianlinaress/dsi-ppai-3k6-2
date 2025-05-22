@@ -31,7 +31,7 @@ public partial class LoginWindow : Window
             IsLoginSuccessful = false;
             var messageBox = new WindowNotificationManager(this)
             {
-                Position = NotificationPosition.TopRight
+                Position = NotificationPosition.BottomRight
             };
             messageBox.Show(new Notification("Error", "Credenciales incorrectas", NotificationType.Error));
         }

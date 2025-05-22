@@ -16,12 +16,34 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    <StackPanel Name="MainPanel">
+    <Grid Name="MainPanel">
+        <!-- Definir filas: 
+         1. Fila expansible (contenido principal al centro) 
+         2. Fila automática (botón de cierre abajo)
+    -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-    <Button
-        Content="{Binding LabelBotonCierre}" 
-        Click="SeleccionarOpcionRegistarCierre" 
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center" />
-    </StackPanel>
+        <!-- Botón centrado en la fila principal -->
+        <Button 
+            Content="{Binding LabelBotonCierre}" 
+            Click="SeleccionarOpcionRegistarCierre" 
+            FontSize="24"
+            Padding="8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center" 
+            Grid.Row="0" />
+
+        <!-- Botón de cerrar sesión en la esquina inferior derecha -->
+        <Button 
+            Content="Cerrar sesión"
+            Click="CerrarSesion" 
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom" 
+            Margin="10"
+            Grid.Row="1" />
+    </Grid>
+    
 </Window>

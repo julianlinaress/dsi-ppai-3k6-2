@@ -23,6 +23,11 @@ public class Sesion()
         return true;
     }
 
+    public void CerrarSesion()
+    {
+        _usuarioActual = null;
+    }
+
     public Usuario? ObtenerRILogueado()
     {
         return _usuarioActual;
