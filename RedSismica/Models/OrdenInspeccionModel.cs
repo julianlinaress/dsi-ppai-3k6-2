@@ -1,23 +1,36 @@
 ﻿using System;
+using Avalonia.Controls.Notifications;
 
 namespace RedSismica.Models;
 
 public class OrdenDeInspeccion(
     int numeroOrden,
     DateTime fechaFinalizacion,
-    Usuario responsableInspeccion,
+    Usuario? responsableInspeccion,
     Estado estado,
     EstacionSismologica estacion)
 {
-    private int NumeroOrden { get; set; } = numeroOrden;
+    public int NumeroOrden { get; set; } = numeroOrden;
     private DateTime FechaFinalizacion { get; set; } = fechaFinalizacion;
-    private Usuario ResponsableInspeccion { get; set; } = responsableInspeccion;
+    private DateTime? FechaHoraCierre { get; set; }
+    private Usuario? ResponsableInspeccion { get; set; } = responsableInspeccion;
     private Estado Estado { get; set; } = estado;
     private EstacionSismologica Estacion { get; set; } = estacion;
 
     public bool EsDeRi(Usuario ri)
     {
-        return ResponsableInspeccion.Id == ri.Id;
+        return ResponsableInspeccion?.Id == ri.Id;
+    }
+
+    public void Cerrar(Estado estado, DateTime fechaHoraCierre)
+    {
+        FechaHoraCierre = fechaHoraCierre;
+        Estado = estado;
+        // var messageBox = new WindowNotificationManager()
+        // {
+        //     Position = NotificationPosition.TopRight
+        // };
+        // messageBox.Show(new Notification("Exito", "Orden de inspeccion cerrada con exito", NotificationType.Success));
     }
 
     public bool EsCompletamenteRealizada()

@@ -1,11 +1,15 @@
+using System;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using Avalonia.Data.Converters;
 using Avalonia.Markup.Xaml;
 using RedSismica.ViewModels;
 using RedSismica.Views;
+using RedSismica.Models;
 
 namespace RedSismica;
 
@@ -15,17 +19,30 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
     }
-
+    
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
+            SesionManager.InicializarSesion(new Sesion());
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+            loginWindow.Closed += (sender, e) =>
             {
-                DataContext = new MainWindowViewModel(),
+                if (loginWindow.IsLoginSuccessful)
+                {
+                    // Inicializar la sesión aquí
+                    desktop.MainWindow = new MainWindow
+                    {
+                        DataContext = new MainWindowViewModel(),
+                    };
+                    desktop.MainWindow.Show();
+                }
+                else
+                {
+                    desktop.Shutdown();
+                }
             };
         }
 
