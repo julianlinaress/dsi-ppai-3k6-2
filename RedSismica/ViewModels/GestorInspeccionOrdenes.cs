@@ -16,7 +16,6 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     private readonly Sesion? _sesion = SesionManager.SesionActual;
     private string? Observacion { get; set; }
     private OrdenDeInspeccion? OrdenSeleccionada { get; set; }
-    private Estado? EstadoCierre { get; set; }
     private VentanaCierreOrden _boundary = boundary;
 
     // Metodos
@@ -74,27 +73,42 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     {
         return !string.IsNullOrEmpty(observacion) && motivosYComentarios.Count > 0;
     }
+
+    private void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo)
+    {
+        OrdenSeleccionada?.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+    }
     public void TomarConfirmacionCierre()
     {
         var fechaActual = DateTime.Now;
+        
         Debug.WriteLine("Validando datos de cierre...");
+        
         if (OrdenSeleccionada == null) return; 
         var datosValidos = ValidarDatosCierre(Observacion, MotivosYComentarios);
         if (!datosValidos) return;
+        
         Debug.WriteLine("Buscando estado de cierre...");
-        EstadoCierre = BuscarEstadoCierre();
-        if (EstadoCierre == null) return;
+        
+        var estadoCierre = BuscarEstadoCierre();
+        if (estadoCierre == null) return;
+        
         Debug.WriteLine("Cerrando orden...");
-        OrdenSeleccionada.Cerrar(EstadoCierre, fechaActual);
+        
+        OrdenSeleccionada.Cerrar(estadoCierre, fechaActual);
+        
         Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
         Debug.WriteLine("Obteniendo estado fuera de servicio...");
+        
         var estadoFueraDeServicioSismografo = ObtenerEstadoFueraDeServicioSismografo();
         if (estadoFueraDeServicioSismografo == null) return;
         Debug.WriteLine("Estado encontrado, actualizando sismógrafo...");
-        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+        PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo);
         var nroIdentificadorSismografo = OrdenSeleccionada?.Estacion.Sismografo.IdentificadorSismografo;
+        
         Debug.WriteLine("Sismografo actualizado, enviando mails...");
         Debug.WriteLine("Buscando mails de responsables de inspeccion...");
+        
         var mails = ObtenerResponsablesDeInspeccion();
         if (mails.Count > 0)
         {
@@ -129,9 +143,12 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             $"Fecha y Hora: {fechaHoraCambioEstado}\n" + 
             $"Motivos y Comentarios: {FormatearMotivosYComentarios(MotivosYComentarios)}";
 
+        
         foreach (var mail in mails)
         {
             if (string.IsNullOrEmpty(mail)) return;
+            Debug.WriteLine("Enviado mail:");
+            Debug.Write(mensaje);
             InterfazEmail.EnviarEmails(mail, "Cierre de Orden de Inspección", mensaje);
         }
     }

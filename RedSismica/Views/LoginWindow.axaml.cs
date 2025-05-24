@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Controls.Notifications;
-using RedSismica.Models;
 
 namespace RedSismica.Views;
 

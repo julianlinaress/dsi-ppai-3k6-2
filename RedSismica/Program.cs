@@ -9,7 +9,7 @@ namespace RedSismica;
 
 public class Program
 {
-    public static BaseDeDatosMock? BaseDeDatosMock { get; set; }
+    public static BaseDeDatosMock? BaseDeDatosMock { get; private set; }
     private static void InicializarDatosDePrueba()
     {
         var estadoCompletado = new Estado("Completamente Realizada", "Orden de Inspeccion");

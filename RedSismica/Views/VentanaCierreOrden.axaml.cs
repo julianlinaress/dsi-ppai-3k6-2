@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.Media;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -62,7 +59,6 @@ public partial class VentanaCierreOrden : Window
     public void MostrarOrdenesParaSeleccion(IOrderedEnumerable<DatosOrdenInspeccion> ordenesData)
     {
         OrdenesDataGrid.ItemsSource = ordenesData;
-        // Ordenes = new ObservableCollection<DatosOrdenInspeccion>(ordenesData);
     }
     
     public async Task PedirConfirmacion()
