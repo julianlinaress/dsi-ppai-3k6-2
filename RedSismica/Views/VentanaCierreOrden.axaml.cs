@@ -84,14 +84,14 @@ public partial class VentanaCierreOrden : Window
             AcceptsReturn = true
         };
 
-        var aceptarClicked = false; // Se usará para determinar si el botón aceptar fue presionado
+        var aceptarClicked = false;
         var button = new Button
         {
             Content = "Aceptar",
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
             Margin = new Thickness(0, 10, 0, 0),
             IsDefault = true,
-            IsEnabled = false // Deshabilitado inicialmente
+            IsEnabled = false
         };
 
         textBox.TextChanged += (_, _) =>
@@ -161,8 +161,7 @@ public partial class VentanaCierreOrden : Window
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap
             };
-
-            // Habilitar el cuadro de texto solo cuando el motivo está seleccionado
+            
             check.IsCheckedChanged += (_, _) => comentario.IsEnabled = check.IsChecked == true;
 
             motivoPanel.Children.Add(check);
@@ -202,7 +201,7 @@ public partial class VentanaCierreOrden : Window
                     Children =
                     {
                         panel,
-                        aceptarButton // Agregar el botón después de los motivos
+                        aceptarButton
                     }
                 }
             }
@@ -216,8 +215,6 @@ public partial class VentanaCierreOrden : Window
         };
 
         await dialog.ShowDialog(this);
-
-        // Obtener resultados seleccionados
         var resultado = new Dictionary<MotivoTipo, string>();
 
         foreach (var motivo in motivoTipos)

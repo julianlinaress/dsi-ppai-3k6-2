@@ -21,10 +21,12 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
         if (cambioEstadoActual == null) return;
         cambioEstadoActual.FechaHoraFin = DateTime.Now;
         Sismografo.Estado = estadoFueraDeServicioSismografo;
+        List<MotivoFueraServicio> motivosFueraServicio = [];
         foreach (var motivo in motivosYComentarios)
         {
             var motivoFueraServicio = new MotivoFueraServicio(motivo.Key, motivo.Value);
+            motivosFueraServicio.Add(motivoFueraServicio);
         }
-        Sismografo.CambioEstado = new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo, motivosYComentarios);
+        Sismografo.CambioEstado = new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo, motivosFueraServicio);
     }
 }

@@ -102,7 +102,9 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         
         var estadoFueraDeServicioSismografo = ObtenerEstadoFueraDeServicioSismografo();
         if (estadoFueraDeServicioSismografo == null) return;
+        
         Debug.WriteLine("Estado encontrado, actualizando sismógrafo...");
+        
         PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo);
         var nroIdentificadorSismografo = OrdenSeleccionada?.Estacion.Sismografo.IdentificadorSismografo;
         
