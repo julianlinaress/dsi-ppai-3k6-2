@@ -10,7 +10,7 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
     
     private CambioEstado? ObtenerCambioEstadoActual()
     {
-        return Sismografo.CambioEstado;
+        return Sismografo.CambioEstado?.Find(estado => estado.EsEstadoActual());
 
     }
     
@@ -27,6 +27,12 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
             var motivoFueraServicio = new MotivoFueraServicio(motivo.Key, motivo.Value);
             motivosFueraServicio.Add(motivoFueraServicio);
         }
-        Sismografo.CambioEstado = new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo, motivosFueraServicio);
+        var nuevoCambioEstado = new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo, motivosFueraServicio);
+        if (Sismografo.CambioEstado != null)
+        {
+            Sismografo.CambioEstado?.Add(nuevoCambioEstado);
+            return;
+        }
+        Sismografo.CambioEstado = [nuevoCambioEstado];
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace RedSismica.Models;
+﻿using System.Collections.Generic;
+
+namespace RedSismica.Models;
 
 public class Sismografo(string nombre)
 {
@@ -6,6 +8,6 @@ public class Sismografo(string nombre)
     public string Nombre { get; private set; } = nombre;
 
     public int IdentificadorSismografo { get; private set; } = _contador++;
-    public CambioEstado? CambioEstado { get; set; }
+    public List<CambioEstado>? CambioEstado { get; set; }
     public Estado? Estado { get; set; }
 }
