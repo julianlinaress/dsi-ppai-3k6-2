@@ -9,8 +9,8 @@ public class Sesion()
 {
     private Usuario? _usuarioActual;
 
-    private DateTime FechaHoraInicio = DateTime.Now;
-    private DateTime FechaHoraFin;
+    private readonly DateTime _fechaHoraInicio = DateTime.Now;
+    // private DateTime FechaHoraFin;
 
     public bool AutenticarUsuario(string? username, string? password)
     {

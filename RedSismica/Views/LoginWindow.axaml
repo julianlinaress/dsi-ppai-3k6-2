@@ -2,20 +2,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="800"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
         x:Class="RedSismica.Views.LoginWindow"
-        Width="450"
-        Height="800"
+        Width="400"
+        SizeToContent="Height"
         Icon="/Assets/avalonia-logo.ico"
-        Title="LogIn"
+        Title="Red Sísmica"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False"
         Padding="20">
     <StackPanel Margin="20">
+        <TextBlock Text="Red Sísmica" 
+                   FontSize="24" 
+                   FontWeight="Bold" 
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,20" />
         <TextBlock Text="Usuario" />
         <TextBox Name="UsernameTextBox" />
         <TextBlock Text="Contraseña" Margin="0,10,0,0" />
         <TextBox PasswordChar="*" Name="PasswordBox" />
         <Button
             IsDefault="True"
-            Click="LoginButton_Click" Name="LoginButton" Content="Iniciar sesión" Margin="0,10,0,0" />
+            Click="LoginButton_Click" Name="LoginButton" Content="Iniciar sesión" Margin="0,20,0,0" />
     </StackPanel>
 </Window>
