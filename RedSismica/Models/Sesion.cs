@@ -1,24 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using RedSismica.Database;
 
 namespace RedSismica.Models;
 
 public class Sesion()
 {
     private Usuario? _usuarioActual;
-
     private readonly DateTime _fechaHoraInicio = DateTime.Now;
-    // private DateTime FechaHoraFin;
 
     public bool AutenticarUsuario(string? username, string? password)
     {
-        var usuario = Program.BaseDeDatosMock?.Usuarios.FirstOrDefault(u => u.Nombre == username && u.Password == password);
-        Debug.WriteLine(usuario);
-        if (usuario == null) return false;
-        _usuarioActual = usuario;
-        return true;
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            return false;
+
+        try
+        {
+            var context = RedSismicaDataContext.Create();
+            var usuario = context.Usuarios.Authenticate(username, password);
+            
+            Debug.WriteLine(usuario != null 
+                ? $"Usuario autenticado: {usuario.Nombre}" 
+                : "Autenticación fallida");
+            
+            if (usuario == null) return false;
+            _usuarioActual = usuario;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error en autenticación: {ex.Message}");
+            return false;
+        }
     }
 
     public void CerrarSesion()

@@ -35,4 +35,15 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
         }
         Sismografo.CambioEstado = [nuevoCambioEstado];
     }
+
+    public DatosEstacion ObtenerDatos()
+    {
+        return new DatosEstacion
+        {
+            Id = Sismografo.IdentificadorSismografo,
+            Nombre = Nombre,
+            NombreSismografo = Sismografo.Nombre,
+            EstadoSismografo = Sismografo.Estado?.Nombre ?? "Sin estado"
+        };
+    }
 }

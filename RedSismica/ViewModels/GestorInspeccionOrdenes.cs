@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using RedSismica.Models;
 using RedSismica.Views;
+using RedSismica.Database;
 
 namespace RedSismica.ViewModels;
 
-public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCierreOrden boundary) : ViewModelBase
+public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewModelBase
 {
     // Atributos
-    // public string? Mensaje { get; set; }
     private Dictionary<MotivoTipo, string> MotivosYComentarios { get; set; } = new();
-
+    private readonly RedSismicaDataContext _context = RedSismicaDataContext.Create();
     private readonly Sesion? _sesion = SesionManager.SesionActual;
     private string? Observacion { get; set; }
     private OrdenDeInspeccion? OrdenSeleccionada { get; set; }
@@ -42,15 +42,13 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
 
     private List<DatosOrdenInspeccion> BuscarOdenes(Usuario riLogueado)
     {
-        return [.. baseDeDatos.OrdenesDeInspeccion
-            .Where(o => o.EsDeRi(riLogueado) && o.EsCompletamenteRealizada())
-            .Select(o => o.ObtenerDatos())];
+        var ordenes = _context.Ordenes.GetCompletamenteRealizadasByResponsable(riLogueado);
+        return ordenes.Select(o => o.ObtenerDatos()).ToList();
     }
 
     public void TomarSeleccionOrden(DatosOrdenInspeccion orden)
     {
-        var ordenSeleccionada = baseDeDatos.OrdenesDeInspeccion.Find(o => orden.NumeroOrden == o.NumeroOrden);
-        OrdenSeleccionada = ordenSeleccionada;
+        OrdenSeleccionada = _context.Ordenes.GetByNumeroOrden(orden.NumeroOrden);
         _ = _boundary.PedirObservacion();
     }
 
@@ -63,9 +61,22 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
     public void TomarObservacion(string observacion)
     {
         Observacion = observacion;
-        var motivotipos = baseDeDatos.MotivosTipos;
-
+        // Load motivo tipos from database
+        var motivotipos = LoadMotivoTipos();
         _ = _boundary.PedirTipos(motivotipos);
+    }
+
+    private List<MotivoTipo> LoadMotivoTipos()
+    {
+        // For now, create in-memory list since we don't have MotivoTipoRepository yet
+        // This matches the seed data
+        return
+        [
+            new MotivoTipo("Reparacion"),
+            new MotivoTipo("Renovacion"),
+            new MotivoTipo("Cambio de Sismografo"),
+            new MotivoTipo("Otro")
+        ];
     }
 
 
@@ -76,8 +87,15 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
 
     private void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo)
     {
-        OrdenSeleccionada?.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+        if (OrdenSeleccionada == null) return;
+        
+        // Update domain object
+        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+        
+        // Persist to database
+        _context.Sismografos.UpdateEstado(OrdenSeleccionada.Estacion.Sismografo, estadoFueraDeServicioSismografo);
     }
+    
     public void TomarConfirmacionCierre()
     {
         var fechaActual = DateTime.Now;
@@ -95,7 +113,11 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         
         Debug.WriteLine("Cerrando orden...");
         
+        // Update domain object
         OrdenSeleccionada.Cerrar(estadoCierre, fechaActual);
+        
+        // Persist orden cierre to database
+        _context.Ordenes.Update(OrdenSeleccionada, estadoCierre, fechaActual);
         
         Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
         Debug.WriteLine("Obteniendo estado fuera de servicio...");
@@ -121,6 +143,8 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
         {
             Debug.WriteLine("No se encontraron mails de responsables de inspeccion...");
         }
+        
+        // Reload ordenes after update
         var riLogueado = _sesion?.ObtenerRILogueado();
         if (riLogueado == null) return;
         var ordenes = BuscarOdenes(riLogueado);
@@ -158,10 +182,12 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
 
     private List<string?> ObtenerResponsablesDeInspeccion()
     {
-        return baseDeDatos.Empleados
-            .Where(e => e.EsResponsableDeInspeccion() && !string.IsNullOrEmpty(e.Mail))
-            .Select(e => e.Mail)
-            .ToList();
+        // For now, return hardcoded emails from seed data
+        // Later: implement EmpleadoRepository to load from database
+        return
+        [
+            "julian@linares.com.ar"
+        ];
     }
 
     private static string FormatearMotivosYComentarios(Dictionary<MotivoTipo, string> motivosYComentarios)
@@ -173,15 +199,13 @@ public class GestorCierreOrdenInspeccion(BaseDeDatosMock baseDeDatos, VentanaCie
             $"{kvp.Key.Descripcion}: {kvp.Value}"));
     }
 
-
     private Estado? BuscarEstadoCierre()
     {
-        var estados = baseDeDatos.Estados;
-        return estados.Find(o => o.EsAmbitoOrdenInspeccion() && o.EsCerrada());
+        return _context.Estados.GetByNombreAndAmbito("Cerrada", "Orden de Inspección");
     }
 
     private Estado? ObtenerEstadoFueraDeServicioSismografo()
     {
-        return baseDeDatos.Estados.Find(o => o.EsAmbitoSismografo() && o.EsFueraDeServicio());
+        return _context.Estados.GetByNombreAndAmbito("Fuera de Servicio", "Sismografo");
     }
 }

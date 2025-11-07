@@ -39,7 +39,9 @@ public class OrdenDeInspeccion(
             NumeroOrden = NumeroOrden,
             FechaFinalizacion = FechaFinalizacion,
             NombreEstacion = Estacion.Nombre,
-            NombreSismografo = Estacion.Sismografo.Nombre
+            NombreSismografo = Estacion.Sismografo.Nombre,
+            Estado = Estado.Nombre,
+            NombreResponsable = ResponsableInspeccion?.Nombre ?? "Sin asignar"
         };
     }
 }
@@ -50,4 +52,6 @@ public class DatosOrdenInspeccion
     public DateTime FechaFinalizacion { get; init; }
     public required string  NombreEstacion { get; set; }
     public required string NombreSismografo { get; set; }
+    public required string Estado { get; set; }
+    public required string NombreResponsable { get; set; }
 }

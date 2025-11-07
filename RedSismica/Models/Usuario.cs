@@ -15,4 +15,15 @@ public class Usuario(int id, string nombre, string password, bool esRi)
     {
         return Empleado;
     }
+
+    public DatosUsuario ObtenerDatos()
+    {
+        return new DatosUsuario
+        {
+            Id = Id,
+            Nombre = Nombre,
+            NombreUsuario = Nombre, // Using Nombre as username for now
+            NombreRol = EsRi ? "Responsable de Inspección" : "Usuario"
+        };
+    }
 }

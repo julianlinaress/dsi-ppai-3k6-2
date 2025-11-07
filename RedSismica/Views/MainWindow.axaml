@@ -5,45 +5,139 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="RedSismica.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="RedSismica"
         WindowState="Maximized"
         Padding="20">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
     <Grid Name="MainPanel">
-        <!-- Definir filas: 
-         1. Fila expansible (contenido principal al centro) 
-         2. Fila automática (botón de cierre abajo)
-    -->
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Botón centrado en la fila principal -->
-        <Button 
-            Content="{Binding LabelBotonCierre}" 
-            Click="SeleccionarOpcionRegistarCierre" 
-            FontSize="24"
-            Padding="8"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center" 
-            Grid.Row="0" />
+        <!-- Header Bar -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <!-- Botón de cerrar sesión en la esquina inferior derecha -->
+                <!-- Register Button -->
+                <Button 
+                    Grid.Column="0"
+                    Content="Registrar Cierre de Orden" 
+                    Click="SeleccionarOpcionRegistarCierre"
+                    Background="#3498DB"
+                    Foreground="White"
+                    Padding="15,8"
+                    FontWeight="SemiBold"
+                    CornerRadius="4" />
+
+                <!-- Refresh Button -->
+                <Button 
+                    Grid.Column="1"
+                    Content="🔄 Actualizar Datos" 
+                    Click="ActualizarDatos"
+                    Background="#27AE60"
+                    Foreground="White"
+                    Padding="15,8"
+                    FontWeight="SemiBold"
+                    CornerRadius="4"
+                    Margin="10,0,0,0" />
+
+                <!-- User Info Panel -->
+                <StackPanel 
+                    Grid.Column="3"
+                    Name="UserInfoPanel"
+                    Orientation="Horizontal"
+                    Spacing="5" />
+            </Grid>
+        </Border>
+
+        <!-- Content Area with DataGrids -->
+        <ScrollViewer Grid.Row="1" Padding="20">
+            <StackPanel Spacing="20">
+                <!-- Estaciones Section -->
+                <StackPanel>
+                    <TextBlock Text="Estaciones Sismológicas" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,10" />
+                    <DataGrid Name="EstacionesDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              BorderThickness="1"
+                              BorderBrush="#BDC3C7">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{ReflectionBinding Id}" Width="80" />
+                            <DataGridTextColumn Header="Nombre" Binding="{ReflectionBinding Nombre}" Width="*" />
+                            <DataGridTextColumn Header="Sismógrafo" Binding="{ReflectionBinding NombreSismografo}" Width="*" />
+                            <DataGridTextColumn Header="Estado" Binding="{ReflectionBinding EstadoSismografo}" Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+
+                <!-- Ordenes Section -->
+                <StackPanel>
+                    <TextBlock Text="Órdenes de Inspección" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,10" />
+                    <DataGrid Name="OrdenesDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              BorderThickness="1"
+                              BorderBrush="#BDC3C7">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="N° Orden" Binding="{ReflectionBinding NumeroOrden}" Width="100" />
+                            <DataGridTextColumn Header="Fecha Fin" Binding="{ReflectionBinding FechaFinalizacion, StringFormat='{}{0:dd/MM/yyyy}'}" Width="120" />
+                            <DataGridTextColumn Header="Estación" Binding="{ReflectionBinding NombreEstacion}" Width="*" />
+                            <DataGridTextColumn Header="Sismógrafo" Binding="{ReflectionBinding NombreSismografo}" Width="*" />
+                            <DataGridTextColumn Header="Estado" Binding="{ReflectionBinding Estado}" Width="180" />
+                            <DataGridTextColumn Header="Responsable" Binding="{ReflectionBinding NombreResponsable}" Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+
+                <!-- Usuarios Section -->
+                <StackPanel>
+                    <TextBlock Text="Usuarios del Sistema" 
+                               FontSize="18" 
+                               FontWeight="Bold" 
+                               Margin="0,0,0,10" />
+                    <DataGrid Name="UsuariosDataGrid"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              GridLinesVisibility="All"
+                              BorderThickness="1"
+                              BorderBrush="#BDC3C7">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{ReflectionBinding Id}" Width="80" />
+                            <DataGridTextColumn Header="Nombre" Binding="{ReflectionBinding Nombre}" Width="*" />
+                            <DataGridTextColumn Header="Usuario" Binding="{ReflectionBinding NombreUsuario}" Width="150" />
+                            <DataGridTextColumn Header="Rol" Binding="{ReflectionBinding NombreRol}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Logout Button -->
         <Button 
+            Grid.Row="2"
             Content="Cerrar sesión"
             Click="CerrarSesion" 
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom" 
             Margin="10"
-            Grid.Row="1" />
+            Padding="10,5" />
     </Grid>
     
 </Window>

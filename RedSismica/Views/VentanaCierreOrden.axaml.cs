@@ -19,8 +19,7 @@ public partial class VentanaCierreOrden : Window
     public VentanaCierreOrden()
     {
         InitializeComponent();
-        if (Program.BaseDeDatosMock == null) return;
-        Gestor = new GestorCierreOrdenInspeccion(Program.BaseDeDatosMock, this);
+        Gestor = new GestorCierreOrdenInspeccion(this);
         Gestor.NuevoCierre(this);
         
         var screen = Screens.Primary;

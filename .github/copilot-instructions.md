@@ -6,10 +6,10 @@ RedSismica is a seismic network monitoring application built with **Avalonia UI*
 ## Architecture & Key Components
 
 ### Application Structure
-- **Entry Point**: `Program.cs` initializes mock data in `BaseDeDatosMock` and launches the Avalonia app
+- **Entry Point**: `Program.cs` initializes SQLite database and launches the Avalonia app
 - **Authentication Flow**: `LoginWindow` → `MainWindow` (requires successful authentication)
 - **Session Management**: Global `SesionManager` singleton maintains `SesionActual` throughout the app lifecycle
-- **Data Layer**: `BaseDeDatosMock` in `Program.BaseDeDatosMock` serves as an in-memory database with test data
+- **Data Layer**: SQLite database with Repository Pattern for data access (located at `RedSismica/Database/redsismica.db`)
 
 ### MVC Pattern (Using MVVM Framework)
 - **Controllers (named ViewModels)**: Inherit from `ViewModelBase` - these are controllers that manage business logic, not traditional MVVM ViewModels
@@ -37,17 +37,30 @@ OrdenDeInspeccion (Inspection Order)
 - **State Transitions**: `OrdenDeInspeccion.Cerrar()` updates state and marks seismograph as out-of-service via `EstacionSismologica.PonerSismografoEnFueraDeServicio()`
 - **OOP Best Practices**: Models use encapsulation (private setters), behavior-rich domain objects, and intention-revealing method names
 
-## Planned Architecture Evolution
+## Database Architecture
 
-### PostgreSQL Database Integration (Next Steps)
-- **Current State**: In-memory `BaseDeDatosMock` provides test data
-- **Migration Plan**: Create domain-to-database mapper layer for PostgreSQL
-- **Data Access Pattern**: Implement repository pattern or data mapper to separate domain logic from persistence
-- **Database Schema**: Will mirror domain model hierarchy (EstacionSismologica → Sismografo → CambioEstado)
+### SQLite Persistence Layer
+- **Database Location**: `RedSismica/Database/redsismica.db` (project root, not build output)
+- **Schema Management**: SQL scripts in `Database/schema.sql` and `Database/seed.sql`
+- **Initialization**: `DatabaseInitializer` automatically creates and seeds database on first run
 
-### Design Patterns to Apply
-- **State Pattern**: Already implemented in `Estado` class - expand as needed
-- **Singleton Pattern**: `SesionManager` singleton - consider for database connection management
+### Repository Pattern Implementation
+- **DataContext**: `RedSismicaDataContext.Create()` provides unified access to all repositories
+- **Repositories**: 
+  - `EstadoRepository` - Estado entities by ambito
+  - `UsuarioRepository` - User authentication and management
+  - `SismografoRepository` - Seismograph data with estado updates
+  - `EstacionSismologicaRepository` - Stations with automatic sismografo loading
+  - `OrdenDeInspeccionRepository` - Complex queries with relationship loading
+- **Materialization**: Database rows → Domain objects (with automatic relationship loading)
+- **Dematerialization**: Domain objects → Database persistence (via Update methods)
+
+### Design Patterns Applied
+- **Repository Pattern**: Encapsulates data access logic
+- **Unit of Work**: `RedSismicaDataContext` coordinates multiple repository operations
+- **Data Mapper**: Separates domain objects from database representation
+- **State Pattern**: Already implemented in `Estado` class
+- **Singleton Pattern**: `SesionManager` for global session state
 - **Repository Pattern**: Planned for PostgreSQL data access layer
 - **Boundary/Interface Pattern**: Continue using for View-Controller communication
 - **DTO Pattern**: Already using `DatosOrdenInspeccion` - expand for database layer
@@ -78,13 +91,14 @@ Hardcoded in `Program.InicializarDatosDePrueba()`:
 - **Estado Literals**: State names are string literals in Spanish ("Completamente Realizada", "Fuera de Servicio")
 
 ### Code Patterns
-1. **Boundary Interaction**: Controllers (ViewModels) call boundary methods like `boundary.MostrarMensaje()`, `boundary.PedirConfirmacion()` (async)
-2. **Data Transfer Objects**: Use `DatosOrdenInspeccion` for UI-safe data projection from domain models
-3. **Validation Methods**: Static validation methods in controllers (e.g., `ValidarDatosCierre()`)
-4. **Debug Tracing**: Extensive `Debug.WriteLine()` statements in `GestorCierreOrdenInspeccion` for workflow debugging
-5. **LINQ Query Pattern**: Use collection expressions `[..]` with LINQ for filtering/projecting data
-6. **Encapsulation**: Models use private setters and expose behavior through methods, not property manipulation
-7. **Intention-Revealing Names**: Methods like `EsCompletamenteRealizada()`, `PonerSismografoEnFueraDeServicio()` clearly express intent
+1. **Repository Access**: Controllers create `RedSismicaDataContext.Create()` to access repositories
+2. **Boundary Interaction**: Controllers (ViewModels) call boundary methods like `boundary.MostrarMensaje()`, `boundary.PedirConfirmacion()` (async)
+3. **Data Transfer Objects**: Use `DatosOrdenInspeccion` for UI-safe data projection from domain models
+4. **Validation Methods**: Static validation methods in controllers (e.g., `ValidarDatosCierre()`)
+5. **Debug Tracing**: Extensive `Debug.WriteLine()` statements in `GestorCierreOrdenInspeccion` for workflow debugging
+6. **Domain-First Updates**: Update domain objects first, then persist via repository (e.g., `orden.Cerrar()` then `context.Ordenes.Update()`)
+7. **Encapsulation**: Models use private setters and expose behavior through methods, not property manipulation
+8. **Intention-Revealing Names**: Methods like `EsCompletamenteRealizada()`, `PonerSismografoEnFueraDeServicio()` clearly express intent
 
 ### Window Management
 - **LoginWindow**: Modal workflow blocks app until closed; `IsLoginSuccessful` property controls navigation
@@ -101,23 +115,25 @@ Hardcoded in `Program.InicializarDatosDePrueba()`:
 ## Common Tasks
 
 ### Adding New Estado (State)
-1. Add to `estados` list in `Program.InicializarDatosDePrueba()` (later: database seeding)
+1. Add to `Database/seed.sql` for initial data
 2. Add behavior method to `Estado` class following State Pattern (e.g., `EsNuevoEstado()`)
-3. Update relevant controllers that filter by state
+3. Update relevant controllers that filter by state using `context.Estados.GetByNombreAndAmbito()`
 4. Follow OOP principles: encapsulate state-specific behavior in the `Estado` class
 
 ### Adding New View/Controller
 1. Create Controller in `ViewModels/` inheriting `ViewModelBase` (despite the name, it's a controller)
-2. Create `.axaml` and `.axaml.cs` in `Views/` with matching name
-3. ViewLocator automatically resolves based on naming convention
-4. If boundary pattern needed, pass View instance to controller constructor
-5. Apply separation of concerns: keep UI logic in View, business logic in Controller, data in Models
+2. Create `RedSismicaDataContext` instance in controller for database access
+3. Create `.axaml` and `.axaml.cs` in `Views/` with matching name
+4. ViewLocator automatically resolves based on naming convention
+5. If boundary pattern needed, pass View instance to controller constructor
+6. Apply separation of concerns: keep UI logic in View, business logic in Controller, data in Models, persistence in Repositories
 
-### Preparing for PostgreSQL Migration
-1. Keep domain models database-agnostic (no entity framework attributes yet)
-2. Use DTOs for data transfer between layers
-3. Design repositories/mappers to translate between domain objects and database entities
-4. Consider using interfaces for data access to maintain testability
+### Working with Database
+1. **Loading Data**: `var context = RedSismicaDataContext.Create(); var usuarios = context.Usuarios.GetAll();`
+2. **Authentication**: `var usuario = context.Usuarios.Authenticate(username, password);`
+3. **Complex Queries**: Use repository-specific methods (e.g., `GetCompletamenteRealizadasByResponsable()`)
+4. **Updating Data**: Update domain object first, then call repository Update method
+5. **Database Location**: `RedSismica/Database/redsismica.db` (can be opened with SQLite browser tools)
 
 ### Email Notifications
 - `GestorCierreOrdenInspeccion.EnviarEmails()` formats change notifications
@@ -130,3 +146,5 @@ Hardcoded in `Program.InicializarDatosDePrueba()`:
 - **SesionManager.cs**: Global session state singleton
 - **GestorCierreOrdenInspeccion.cs**: Core business logic for order closure workflow
 - **VentanaCierreOrden.axaml.cs**: Main inspection order UI with multi-step async workflow
+
+Do not create readme or documentation files unless explicitly instructed.
