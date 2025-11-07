@@ -28,6 +28,7 @@ AppPackages/
 
 ## Archivos temporales del sistema
 *.log
+*.db
 *.tmp
 *.bak
 *.swp

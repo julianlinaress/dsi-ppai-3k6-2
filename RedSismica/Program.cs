@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using Avalonia.ReactiveUI;
 using RedSismica.Models;
+using RedSismica.Database;
+using System.Diagnostics;
 
 namespace RedSismica;
 
@@ -101,7 +103,14 @@ public class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // Initialize SQLite database (creates if doesn't exist)
+        Debug.WriteLine("Initializing database...");
+        DatabaseInitializer.Initialize();
+        DatabaseInitializer.TestConnection();
+        
+        // Still using mock data for now (will migrate later)
         InicializarDatosDePrueba();
+        
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
