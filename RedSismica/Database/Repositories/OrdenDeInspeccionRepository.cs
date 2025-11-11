@@ -80,12 +80,17 @@ public class OrdenDeInspeccionRepository
             FROM OrdenDeInspeccion 
             ORDER BY NumeroOrden";
         
+        System.Diagnostics.Debug.WriteLine("[OrdenDeInspeccionRepository] Executing GetAll query...");
+        
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
+            var numeroOrden = reader.GetInt32(reader.GetOrdinal("NumeroOrden"));
+            System.Diagnostics.Debug.WriteLine($"[OrdenDeInspeccionRepository] Materializing orden #{numeroOrden}");
             ordenes.Add(MaterializeOrden(reader));
         }
         
+        System.Diagnostics.Debug.WriteLine($"[OrdenDeInspeccionRepository] GetAll completed: {ordenes.Count} ordenes");
         return ordenes;
     }
 

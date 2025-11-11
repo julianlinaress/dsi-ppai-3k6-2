@@ -64,11 +64,13 @@ CREATE TABLE Usuario (
 -- ============================================================================
 
 -- Sismógrafos
+-- EstadoId is kept synchronized with the active CambioEstado record (FechaHoraFin IS NULL)
+-- This provides efficient querying while maintaining state history in CambioEstado
 CREATE TABLE Sismografo (
     SismografoId INTEGER PRIMARY KEY AUTOINCREMENT,
     IdentificadorSismografo INTEGER NOT NULL UNIQUE,
     Nombre VARCHAR(200) NOT NULL,
-    EstadoId INTEGER,
+    EstadoId INTEGER NOT NULL,
     FOREIGN KEY (EstadoId) REFERENCES Estado(EstadoId)
 );
 

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -30,53 +30,55 @@ public partial class MainWindow : Window
         var userInfoPanel = this.FindControl<StackPanel>("UserInfoPanel");
         if (userInfoPanel == null) return;
 
-        var userIcon = new TextBlock
-        {
-            Text = "👤",
-            FontSize = 16,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Foreground = Brushes.White
-        };
-
         var userName = new TextBlock
         {
             Text = usuarioActual.Nombre,
-            FontSize = 14,
-            FontWeight = FontWeight.SemiBold,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Foreground = Brushes.White,
-            Margin = new Thickness(5, 0, 0, 0)
+            FontSize = 12,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
         };
 
-        userInfoPanel.Children.Add(userIcon);
         userInfoPanel.Children.Add(userName);
     }
 
     private async Task CargarDatosTablasAsync()
     {
         // Load data in background thread
-        var (estacionesData, ordenesData, usuariosData) = await Task.Run(() =>
+        var (sismografosData, estacionesData, ordenesData, usuariosData) = await Task.Run(() =>
         {
             var context = RedSismicaDataContext.Create();
+            
+            var sismografos = context.Sismografos.GetAll()
+                .Select(s => s.ObtenerDatos())
+                .ToList();
+            Debug.WriteLine($"[MainWindow] Loaded {sismografos.Count} sismógrafos");
             
             var estaciones = context.Estaciones.GetAll()
                 .Select(e => e.ObtenerDatos())
                 .ToList();
+            Debug.WriteLine($"[MainWindow] Loaded {estaciones.Count} estaciones");
             
             var ordenes = context.Ordenes.GetAll()
                 .Select(o => o.ObtenerDatos())
                 .ToList();
+            Debug.WriteLine($"[MainWindow] Loaded {ordenes.Count} órdenes de inspección");
             
             var usuarios = context.Usuarios.GetAll()
                 .Select(u => u.ObtenerDatos())
                 .ToList();
+            Debug.WriteLine($"[MainWindow] Loaded {usuarios.Count} usuarios");
             
-            return (estaciones, ordenes, usuarios);
+            return (sismografos, estaciones, ordenes, usuarios);
         });
 
         // Update UI on main thread
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            var sismografosGrid = this.FindControl<DataGrid>("SismografosDataGrid");
+            if (sismografosGrid != null)
+            {
+                sismografosGrid.ItemsSource = sismografosData;
+            }
+
             var estacionesGrid = this.FindControl<DataGrid>("EstacionesDataGrid");
             if (estacionesGrid != null)
             {
@@ -105,7 +107,7 @@ public partial class MainWindow : Window
         if (boton != null)
         {
             boton.IsEnabled = false;
-            boton.Content = "⏳ Actualizando...";
+            boton.Content = "Actualizando...";
         }
 
         try
@@ -118,7 +120,7 @@ public partial class MainWindow : Window
             if (boton != null)
             {
                 boton.IsEnabled = true;
-                boton.Content = "🔄 Actualizar Datos";
+                boton.Content = "Actualizar Datos";
             }
         }
     }
@@ -155,5 +157,15 @@ public partial class MainWindow : Window
     {
         var ventanaCierre = new VentanaCierreOrden();
         ventanaCierre.Show();
+    }
+
+    private void VerHistorialSismografo(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button) return;
+        if (button.Tag is not DatosSismografo datosSismografo) return;
+        if (datosSismografo.SismografoCompleto == null) return;
+
+        var ventanaHistorial = new VentanaHistorialEstados(datosSismografo.SismografoCompleto);
+        ventanaHistorial.Show();
     }
 }

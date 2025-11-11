@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="RedSismica.Views.VentanaHistorialEstados"
+        Title="Historial de Estados"
+        Width="900" Height="600"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="10">
+            <TextBlock Text="Historial de Estados" FontSize="14" FontWeight="Bold"/>
+            <TextBlock Name="SismografoInfo" FontSize="11" Margin="0,5,0,0"/>
+        </StackPanel>
+        
+        <!-- DataGrid -->
+        <DataGrid Grid.Row="1"
+                  Name="HistorialDataGrid"
+                  IsReadOnly="True"
+                  AutoGenerateColumns="False"
+                  GridLinesVisibility="All"
+                  Margin="10,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Estado" 
+                                   Binding="{ReflectionBinding Estado}" 
+                                   Width="120"/>
+                <DataGridTextColumn Header="Inicio" 
+                                   Binding="{ReflectionBinding FechaHoraInicio}" 
+                                   Width="150"/>
+                <DataGridTextColumn Header="Fin" 
+                                   Binding="{ReflectionBinding FechaHoraFin}" 
+                                   Width="150"/>
+                <DataGridTextColumn Header="Duración" 
+                                   Binding="{ReflectionBinding Duracion}" 
+                                   Width="100"/>
+                <DataGridTextColumn Header="Motivos" 
+                                   Binding="{ReflectionBinding Motivos}" 
+                                   Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Footer -->
+        <Button Grid.Row="2"
+                Content="Cerrar" 
+                Click="Cerrar"
+                Padding="10,5"
+                HorizontalAlignment="Right"
+                Margin="10"/>
+    </Grid>
+</Window>

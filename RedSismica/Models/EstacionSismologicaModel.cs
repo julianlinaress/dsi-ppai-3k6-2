@@ -8,32 +8,26 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
     public string Nombre { get; private set; } = nombre;
     public Sismografo Sismografo { get; } = sismografo;
     
-    private CambioEstado? ObtenerCambioEstadoActual()
-    {
-        return Sismografo.CambioEstado?.Find(estado => estado.EsEstadoActual());
-
-    }
-    
     public void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo, Dictionary<MotivoTipo, string> motivosYComentarios)
     {
-        var fechaHoraActual = DateTime.Now;
-        var cambioEstadoActual = ObtenerCambioEstadoActual();
-        if (cambioEstadoActual == null) return;
-        cambioEstadoActual.FechaHoraFin = DateTime.Now;
-        Sismografo.Estado = estadoFueraDeServicioSismografo;
+        if (Sismografo.Estado == null || Sismografo.CambioEstado == null) return;
+        
+        // Convertir motivos a lista
         List<MotivoFueraServicio> motivosFueraServicio = [];
         foreach (var motivo in motivosYComentarios)
         {
             var motivoFueraServicio = new MotivoFueraServicio(motivo.Key, motivo.Value);
             motivosFueraServicio.Add(motivoFueraServicio);
         }
-        var nuevoCambioEstado = new CambioEstado(fechaHoraActual, estadoFueraDeServicioSismografo, motivosFueraServicio);
-        if (Sismografo.CambioEstado != null)
-        {
-            Sismografo.CambioEstado?.Add(nuevoCambioEstado);
-            return;
-        }
-        Sismografo.CambioEstado = [nuevoCambioEstado];
+        
+        // Delegar al estado del sismógrafo (patrón State)
+        Sismografo.Estado.PonerFueraDeServicio(
+            responsable: null!, // TODO: Obtener empleado del contexto
+            motivos: motivosFueraServicio,
+            fechaYHora: DateTime.Now,
+            self: Sismografo,
+            cambiosDeEstado: Sismografo.CambioEstado
+        );
     }
 
     public DatosEstacion ObtenerDatos()

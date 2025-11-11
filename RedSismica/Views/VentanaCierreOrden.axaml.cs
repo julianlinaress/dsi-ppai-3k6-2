@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -26,13 +27,13 @@ public partial class VentanaCierreOrden : Window
         if (screen != null)
         {
             var workingArea = screen.WorkingArea;
-            Width = workingArea.Width * 0.8;
-            Height = workingArea.Height * 0.8;
+            Width = Math.Min(workingArea.Width * 0.6, 1000);
+            Height = Math.Min(workingArea.Height * 0.7, 700);
         }
         else
         {
-            Width = 1024;
-            Height = 768;
+            Width = 900;
+            Height = 650;
         }
     }
 

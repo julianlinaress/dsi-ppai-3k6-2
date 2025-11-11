@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Data.Sqlite;
 
 namespace RedSismica.Database;
@@ -72,6 +73,11 @@ public static class DatabaseInitializer
     {
         using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
+        
+        // Enable foreign key constraints
+        using var fkCommand = connection.CreateCommand();
+        fkCommand.CommandText = "PRAGMA foreign_keys = ON;";
+        fkCommand.ExecuteNonQuery();
 
         var schemaScript = GetSchemaScript();
         using var command = connection.CreateCommand();
@@ -83,11 +89,79 @@ public static class DatabaseInitializer
     {
         using var connection = new SqliteConnection(ConnectionString);
         connection.Open();
+        
+        // Enable foreign key constraints
+        using var fkCommand = connection.CreateCommand();
+        fkCommand.CommandText = "PRAGMA foreign_keys = ON;";
+        fkCommand.ExecuteNonQuery();
+        Debug.WriteLine("✓ Foreign keys enabled");
 
         var seedScript = GetSeedScript();
-        using var command = connection.CreateCommand();
-        command.CommandText = seedScript;
-        command.ExecuteNonQuery();
+        
+        // Split by semicolon and execute statement by statement for better error reporting
+        var statements = seedScript.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        Debug.WriteLine($"Total statements after split: {statements.Length}");
+        
+        int executedCount = 0;
+        for (int i = 0; i < statements.Length; i++)
+        {
+            var statement = statements[i].Trim();
+            
+            // Remove SQL comments (-- style)
+            var lines = statement.Split('\n');
+            var cleanedLines = lines
+                .Select(line => 
+                {
+                    var commentIndex = line.IndexOf("--");
+                    return commentIndex >= 0 ? line.Substring(0, commentIndex) : line;
+                })
+                .Where(line => !string.IsNullOrWhiteSpace(line));
+            
+            statement = string.Join("\n", cleanedLines).Trim();
+            
+            if (string.IsNullOrWhiteSpace(statement))
+                continue;
+                
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = statement;
+                var rowsAffected = command.ExecuteNonQuery();
+                executedCount++;
+                
+                // Log INSERT statements with details
+                if (statement.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase))
+                {
+                    var tableName = ExtractTableName(statement);
+                    Debug.WriteLine($"  [{executedCount}] ✓ INSERT into {tableName} - {rowsAffected} row(s)");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"  [{executedCount + 1}] ✗ ERROR executing statement:");
+                Debug.WriteLine($"      Statement: {statement.Substring(0, Math.Min(200, statement.Length))}...");
+                Debug.WriteLine($"      Error: {ex.Message}");
+                throw; // Re-throw to maintain existing error handling
+            }
+        }
+        
+        Debug.WriteLine($"✓ All seed statements executed successfully ({executedCount} statements)");
+    }
+    
+    private static string ExtractTableName(string insertStatement)
+    {
+        try
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                insertStatement, 
+                @"INSERT\s+INTO\s+(\w+)", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            return match.Success ? match.Groups[1].Value : "Unknown";
+        }
+        catch
+        {
+            return "Unknown";
+        }
     }
 
     private static string GetSchemaScript()

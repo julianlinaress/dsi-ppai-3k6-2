@@ -19,13 +19,26 @@ public class EstadoRepository
 
     /// <summary>
     /// Materializes a Estado from a database row
+    /// Creates concrete State classes for Sismografo states, generic Estado for Orden states
     /// </summary>
     private Estado MaterializeEstado(SqliteDataReader reader)
     {
         var nombre = reader.GetString(reader.GetOrdinal("Nombre"));
         var ambito = reader.GetString(reader.GetOrdinal("Ambito"));
         
-        return new Estado(nombre, ambito);
+        // Pattern State solo para estados de Sismógrafo
+        if (ambito == "Sismografo")
+        {
+            return nombre switch
+            {
+                "En Línea" => new EnLinea(),
+                "Fuera de Servicio" => new FueraDeServicio(),
+                _ => new EstadoGenerico(nombre, ambito)
+            };
+        }
+        
+        // Estados de Orden de Inspección usan clase genérica
+        return new EstadoGenerico(nombre, ambito);
     }
 
     /// <summary>
