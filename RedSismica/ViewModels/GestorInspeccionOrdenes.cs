@@ -105,7 +105,8 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
                 OrdenSeleccionada.Estacion.Sismografo,
                 nuevoEstado,
                 fechaActual,
-                motivos);
+                motivos
+            );
         }
     }
     
