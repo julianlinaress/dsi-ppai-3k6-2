@@ -3,66 +3,129 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:RedSismica.Views"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="RedSismica.Views.VentanaCierreOrden"
         x:DataType="views:VentanaCierreOrden"
-        Title="Órdenes de Inspección"
-        Width="900" Height="600" 
-        WindowStartupLocation="CenterScreen">
+        Title="Registrar Cierre de Orden"
+        Width="950" Height="650" 
+        WindowStartupLocation="CenterScreen"
+        Background="#F9FAFB">
 
     <DockPanel LastChildFill="True">
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" 
+                Background="White" 
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,0,0,1"
+                Padding="20"
+                Height="70">
+            <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="📋" FontSize="28"/>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Órdenes de Inspección" 
+                              FontSize="20" 
+                              FontWeight="Bold" 
+                              Foreground="#1F2937"/>
+                    <TextBlock Text="Selecciona una orden para registrar su cierre" 
+                              FontSize="12" 
+                              Foreground="#6B7280"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Footer with Actions -->
         <StackPanel DockPanel.Dock="Bottom" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
-                    Margin="20">
-            <Button Click="BotonCancelar_Click">Cancelar</Button>
+                    Margin="20"
+                    Spacing="12">
+            <Button Content="❌ Cancelar" 
+                   Click="BotonCancelar_Click"
+                   Classes="Secondary"
+                   Padding="12,8"
+                   FontSize="13"/>
+            <Button Content="✓ Confirmar" 
+                   Click="BotonCancelar_Click"
+                   Classes="Primary"
+                   Padding="12,8"
+                   FontSize="13"/>
         </StackPanel>
-        <Grid Margin="20" RowDefinitions="Auto,*" Name="GrillaOrdenesDeInspeccion">
-            <TextBlock Grid.Row="0" 
-                       Margin="0,0,0,10">Ordenes de Inspeccion</TextBlock>
-            <TextBlock x:Name="MensajeTextBlock"
-                       Grid.Row="1"
-                       Text=""
-                       IsVisible="False"
-                       FontSize="18"
-                       Foreground="Gray"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextAlignment="Center" />
-            
-            <DataGrid Grid.Row="1" 
-                      x:Name="OrdenesDataGrid"
-                      AutoGenerateColumns="True" 
-                      IsReadOnly="True" 
-                      GridLinesVisibility="All"
-                      BorderThickness="1" 
+
+        <!-- Content Area -->
+        <Border Margin="20" 
+                Background="White" 
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                CornerRadius="6">
+            <Grid RowDefinitions="Auto,*" Name="GrillaOrdenesDeInspeccion">
+                <!-- Title -->
+                <TextBlock Grid.Row="0" 
+                           Text="Seleccione una orden:" 
+                           Classes="Label"
+                           Margin="20,20,20,10"
+                           FontSize="14"
+                           FontWeight="Medium"
+                           Foreground="#6B7280"/>
+                
+                <!-- Empty State Message -->
+                <TextBlock x:Name="MensajeTextBlock"
+                           Grid.Row="1"
+                           Text="No hay órdenes disponibles"
+                           IsVisible="False"
+                           FontSize="16"
+                           Foreground="#9CA3AF"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextAlignment="Center" />
+                
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1" 
+                          x:Name="OrdenesDataGrid"
+                          AutoGenerateColumns="True" 
+                          IsReadOnly="True" 
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="0"
                       SelectionMode="Single"
                       CanUserReorderColumns="False"
                       CanUserResizeColumns="True"
                       SelectionChanged="TomarSeleccionOrden"
-                      CanUserSortColumns="True">
+                      CanUserSortColumns="True"
+                      Margin="0"
+                      Background="White">
 
                 <DataGrid.Styles>
-                <!-- Estilo base para las filas -->
-                <Style Selector="DataGridRow">
-                    <Setter Property="Background" Value="Transparent"/>
-                </Style>
-                
-                <!-- Estilo para las filas seleccionadas -->
-                <Style Selector="DataGridRow:selected">
-                    <Setter Property="Background" Value="#4287f5"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Style>
-                                
-                <Style Selector="DataGridRow:pointerover">
-                    <Setter Property="Cursor" Value="Hand"/>
-                </Style>
-                <!-- Prioridad para hover en filas no seleccionadas -->
-                <Style Selector="DataGridRow:pointerover:not(:selected)">
-                    <Setter Property="Background" Value="#1F007ACC"/>
-                </Style>
-            </DataGrid.Styles>
+                    <!-- Header styling -->
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#F3F4F6"/>
+                        <Setter Property="Foreground" Value="#1F2937"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                    </Style>
+
+                    <!-- Row styling -->
+                    <Style Selector="DataGridRow">
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                    
+                    <!-- Selected row styling -->
+                    <Style Selector="DataGridRow:selected">
+                        <Setter Property="Background" Value="#DBEAFE"/>
+                        <Setter Property="Foreground" Value="#1F2937"/>
+                    </Style>
+                    
+                    <!-- Hover styling -->
+                    <Style Selector="DataGridRow:pointerover">
+                        <Setter Property="Cursor" Value="Hand"/>
+                    </Style>
+                    
+                    <Style Selector="DataGridRow:pointerover:not(:selected)">
+                        <Setter Property="Background" Value="#F3F4F6"/>
+                    </Style>
+                </DataGrid.Styles>
             </DataGrid>
-        </Grid>
+            </Grid>
+        </Border>
     </DockPanel>
 </Window>

@@ -2,11 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="RedSismica.Views.VentanaHistorialEstados"
         Title="Historial de Estados"
-        Width="900" Height="600"
-        WindowStartupLocation="CenterScreen">
+        Width="950" Height="650"
+        WindowStartupLocation="CenterScreen"
+        Background="#F9FAFB">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -15,44 +16,94 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="10">
-            <TextBlock Text="Historial de Estados" FontSize="14" FontWeight="Bold"/>
-            <TextBlock Name="SismografoInfo" FontSize="11" Margin="0,5,0,0"/>
-        </StackPanel>
+        <!-- Header with styling -->
+        <Border Grid.Row="0" 
+                Background="White" 
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,0,0,1"
+                Padding="20">
+            <StackPanel Spacing="8">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="📜" FontSize="28"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Historial de Estados" 
+                                  FontSize="20" 
+                                  FontWeight="Bold" 
+                                  Foreground="#1F2937"/>
+                    </StackPanel>
+                </StackPanel>
+                <TextBlock Name="SismografoInfo" 
+                          FontSize="13" 
+                          Foreground="#6B7280"
+                          Margin="40,0,0,0"/>
+            </StackPanel>
+        </Border>
         
         <!-- DataGrid -->
         <DataGrid Grid.Row="1"
                   Name="HistorialDataGrid"
                   IsReadOnly="True"
                   AutoGenerateColumns="False"
-                  GridLinesVisibility="All"
-                  Margin="10,0">
+                  GridLinesVisibility="Horizontal"
+                  Background="White"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1"
+                  Margin="20"
+                  CornerRadius="6">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Estado" 
                                    Binding="{ReflectionBinding Estado}" 
-                                   Width="120"/>
+                                   Width="130"/>
                 <DataGridTextColumn Header="Inicio" 
                                    Binding="{ReflectionBinding FechaHoraInicio}" 
-                                   Width="150"/>
+                                   Width="160"/>
                 <DataGridTextColumn Header="Fin" 
                                    Binding="{ReflectionBinding FechaHoraFin}" 
-                                   Width="150"/>
+                                   Width="160"/>
                 <DataGridTextColumn Header="Duración" 
                                    Binding="{ReflectionBinding Duracion}" 
-                                   Width="100"/>
+                                   Width="120"/>
                 <DataGridTextColumn Header="Motivos" 
                                    Binding="{ReflectionBinding Motivos}" 
                                    Width="*"/>
             </DataGrid.Columns>
+            
+            <DataGrid.Styles>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#F3F4F6"/>
+                    <Setter Property="Foreground" Value="#1F2937"/>
+                    <Setter Property="Padding" Value="12,8"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                </Style>
+                
+                <Style Selector="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+                
+                <Style Selector="DataGridRow:pointerover">
+                    <Setter Property="Background" Value="#F3F4F6"/>
+                </Style>
+                
+                <Style Selector="DataGridRow:selected">
+                    <Setter Property="Background" Value="#DBEAFE"/>
+                    <Setter Property="Foreground" Value="#1F2937"/>
+                </Style>
+            </DataGrid.Styles>
         </DataGrid>
         
         <!-- Footer -->
-        <Button Grid.Row="2"
-                Content="Cerrar" 
-                Click="Cerrar"
-                Padding="10,5"
-                HorizontalAlignment="Right"
-                Margin="10"/>
+        <StackPanel Grid.Row="2"
+                   Orientation="Horizontal"
+                   HorizontalAlignment="Right"
+                   Margin="20"
+                   Spacing="12">
+            <Button Content="✓ Cerrar" 
+                   Click="Cerrar"
+                   Classes="Primary"
+                   Padding="12,8"
+                   FontSize="13"/>
+        </StackPanel>
     </Grid>
 </Window>
