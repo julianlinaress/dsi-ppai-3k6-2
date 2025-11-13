@@ -85,18 +85,23 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         return !string.IsNullOrEmpty(observacion) && motivosYComentarios.Count > 0;
     }
 
-    private void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo)
+    private void PonerSismografoEnFueraDeServicio(DateTime fechaActual)
     {
         if (OrdenSeleccionada == null) return;
         
         // Update domain object
-        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo, MotivosYComentarios);
+        Empleado? responsable = _sesion?.ObtenerRILogueado()?.ObtenerEmpleado();
+        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(MotivosYComentarios, fechaActual, responsable);
         
         // Persist to database
-        _context.Sismografos.UpdateEstado(OrdenSeleccionada.Estacion.Sismografo, estadoFueraDeServicioSismografo);
+        var nuevoEstado = OrdenSeleccionada.Estacion.Sismografo.Estado;
+        if (nuevoEstado != null)
+        {
+            _context.Sismografos.UpdateEstado(OrdenSeleccionada.Estacion.Sismografo, nuevoEstado, fechaActual);
+        }
     }
     
-    public void TomarConfirmacionCierre()
+    public async void TomarConfirmacionCierre()
     {
         var fechaActual = DateTime.Now;
         
@@ -113,21 +118,12 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         
         Debug.WriteLine("Cerrando orden...");
         
-        // Update domain object
         OrdenSeleccionada.Cerrar(estadoCierre, fechaActual);
-        
-        // Persist orden cierre to database
         _context.Ordenes.Update(OrdenSeleccionada, estadoCierre, fechaActual);
         
         Debug.WriteLine("Orden de inspeccion cerrada correctamente!");
-        Debug.WriteLine("Obteniendo estado fuera de servicio...");
-        
-        var estadoFueraDeServicioSismografo = ObtenerEstadoFueraDeServicioSismografo();
-        if (estadoFueraDeServicioSismografo == null) return;
-        
-        Debug.WriteLine("Estado encontrado, actualizando sismógrafo...");
-        
-        PonerSismografoEnFueraDeServicio(estadoFueraDeServicioSismografo);
+        Debug.WriteLine("Actualizando sismógrafo a Inhabilitado...");
+        PonerSismografoEnFueraDeServicio(fechaActual);
         var nroIdentificadorSismografo = OrdenSeleccionada?.Estacion.Sismografo.IdentificadorSismografo;
         
         Debug.WriteLine("Sismografo actualizado, enviando mails...");
@@ -137,14 +133,14 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         if (mails.Count > 0)
         {
             Debug.WriteLine("Enviando mails...");
-            EnviarEmails(mails, estadoFueraDeServicioSismografo.Nombre, fechaActual, nroIdentificadorSismografo);
+            var nombreEstado = OrdenSeleccionada?.Estacion?.Sismografo?.Estado?.Nombre ?? "Fuera de Servicio";
+            await EnviarEmailsAsync(mails, nombreEstado, fechaActual, nroIdentificadorSismografo);
         }
         else
         {
             Debug.WriteLine("No se encontraron mails de responsables de inspeccion...");
         }
         
-        // Reload ordenes after update
         var riLogueado = _sesion?.ObtenerRILogueado();
         if (riLogueado == null) return;
         var ordenes = BuscarOdenes(riLogueado);
@@ -157,26 +153,44 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         _boundary.MostrarOrdenesParaSeleccion(ordenesPorFecha);
     }
 
-    private void EnviarEmails(
-        List<string?> mails, 
-        string nombreEstadoFueraServicio, 
-        DateTime fechaHoraCambioEstado, 
+    private async System.Threading.Tasks.Task EnviarEmailsAsync(
+        List<string?> mails,
+        string nombreEstadoFueraServicio,
+        DateTime fechaHoraCambioEstado,
         int? nroIdentificadorSismografo)
     {
-        var mensaje = 
-            $"Nro. ID Sismógrafo: {nroIdentificadorSismografo.ToString()}\n" + 
-            $"Estado: {nombreEstadoFueraServicio}\n" + 
-            $"Fecha y Hora: {fechaHoraCambioEstado}\n" + 
+        var mensaje =
+            $"Nro. ID Sismógrafo: {nroIdentificadorSismografo.ToString()}\n" +
+            $"Estado: {nombreEstadoFueraServicio}\n" +
+            $"Fecha y Hora: {fechaHoraCambioEstado}\n" +
             $"Motivos y Comentarios: {FormatearMotivosYComentarios(MotivosYComentarios)}";
 
-        
+        var total = mails.Count;
+        var mainWindow = ObtenerMainWindow();
+        int enviados = 0;
+
         foreach (var mail in mails)
         {
-            if (string.IsNullOrEmpty(mail)) return;
-            Debug.WriteLine("Enviado mail:");
-            Debug.Write(mensaje);
-            InterfazEmail.EnviarEmails(mail, "Cierre de Orden de Inspección", mensaje);
+            if (string.IsNullOrEmpty(mail)) continue;
+            enviados++;
+            mainWindow?.ActualizarEstadoEnvio($"Enviando mails {enviados}/{total}");
+            Debug.WriteLine($"[Email] Enviando {enviados}/{total} a {mail}");
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                InterfazEmail.EnviarEmails(mail, "Cierre de Orden de Inspección", mensaje);
+            });
         }
+
+        mainWindow?.ActualizarEstadoEnvio("");
+    }
+
+    private static MainWindow? ObtenerMainWindow()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            return desktop.MainWindow as MainWindow;
+        }
+        return null;
     }
 
 
@@ -204,8 +218,5 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         return _context.Estados.GetByNombreAndAmbito("Cerrada", "Orden de Inspección");
     }
 
-    private Estado? ObtenerEstadoFueraDeServicioSismografo()
-    {
-        return _context.Estados.GetByNombreAndAmbito("Fuera de Servicio", "Sismografo");
-    }
+    // Eliminado: obtener estado de FdS de repositorio no es necesario, el patrón State lo crea
 }

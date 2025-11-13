@@ -31,7 +31,7 @@ public class EstadoRepository
         {
             return nombre switch
             {
-                "En Línea" => new EnLinea(),
+                "Inhabilitado" => new Inhabilitado(),
                 "Fuera de Servicio" => new FueraDeServicio(),
                 _ => new EstadoGenerico(nombre, ambito)
             };

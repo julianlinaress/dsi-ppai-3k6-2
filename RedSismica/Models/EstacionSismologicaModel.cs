@@ -8,7 +8,7 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
     public string Nombre { get; private set; } = nombre;
     public Sismografo Sismografo { get; } = sismografo;
     
-    public void PonerSismografoEnFueraDeServicio(Estado estadoFueraDeServicioSismografo, Dictionary<MotivoTipo, string> motivosYComentarios)
+    public void PonerSismografoEnFueraDeServicio(Dictionary<MotivoTipo, string> motivosYComentarios, DateTime fechaYHora, Empleado? responsable)
     {
         if (Sismografo.Estado == null || Sismografo.CambioEstado == null) return;
         
@@ -21,10 +21,10 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
         }
         
         // Delegar al estado del sismógrafo (patrón State)
-        Sismografo.Estado.PonerFueraDeServicio(
-            responsable: null!, // TODO: Obtener empleado del contexto
+        Sismografo.Estado.FueraDeServicio(
+            responsable: responsable!,
             motivos: motivosFueraServicio,
-            fechaYHora: DateTime.Now,
+            fechaYHora: fechaYHora,
             self: Sismografo,
             cambiosDeEstado: Sismografo.CambioEstado
         );

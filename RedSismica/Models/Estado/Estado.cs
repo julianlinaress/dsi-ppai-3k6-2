@@ -27,14 +27,15 @@ public abstract class Estado
     // Métodos para Sismógrafo (con patrón State - override en subclases)
     public virtual bool EsAmbitoSismografo() => Ambito == "Sismografo";
     public virtual bool EsFueraDeServicio() => false;
+    public virtual bool EsInhabilitado() => false;
     
-    public virtual void PonerFueraDeServicio(
+    public virtual void FueraDeServicio(
         Empleado responsable,
         List<MotivoFueraServicio> motivos,
         DateTime fechaYHora,
         Sismografo self,
         List<CambioEstado> cambiosDeEstado)
     {
-        // Por defecto no hace nada - las subclases de Sismógrafo hacen override
+        throw new NotImplementedException("Método no implementado para este estado.");
     }
 }

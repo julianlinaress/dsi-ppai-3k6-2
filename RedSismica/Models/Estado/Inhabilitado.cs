@@ -3,13 +3,15 @@ using System.Collections.Generic;
 
 namespace RedSismica.Models;
 
-public class EnLinea : Estado
+public class Inhabilitado : Estado
 {
-    public EnLinea() : base("En Línea", "Sismografo")
+    public Inhabilitado() : base("Inhabilitado", "Sismografo")
     {
     }
 
-    public override void PonerFueraDeServicio(
+    public override bool EsInhabilitado() => true;
+
+    public override void FueraDeServicio(
         Empleado responsable,
         List<MotivoFueraServicio> motivos,
         DateTime fechaYHora,

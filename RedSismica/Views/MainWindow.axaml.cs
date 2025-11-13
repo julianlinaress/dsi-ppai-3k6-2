@@ -22,6 +22,17 @@ public partial class MainWindow : Window
         _ = CargarDatosTablasAsync();
     }
 
+    public void ActualizarEstadoEnvio(string texto)
+    {
+        var status = this.FindControl<TextBlock>("StatusText");
+        if (status == null) return;
+        Dispatcher.UIThread.Post(() =>
+        {
+            status.Text = texto;
+            status.IsVisible = !string.IsNullOrWhiteSpace(texto);
+        });
+    }
+
     private void CargarDatosUsuario()
     {
         var usuarioActual = SesionManager.SesionActual?.ObtenerRILogueado();

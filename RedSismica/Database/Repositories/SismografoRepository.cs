@@ -67,6 +67,7 @@ public class SismografoRepository
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
+            var cambioEstadoId = reader.GetInt32(reader.GetOrdinal("CambioEstadoId"));
             var fechaInicio = reader.GetDateTime(reader.GetOrdinal("FechaHoraInicio"));
             var fechaFinOrdinal = reader.GetOrdinal("FechaHoraFin");
             DateTime? fechaFin = reader.IsDBNull(fechaFinOrdinal) ? null : reader.GetDateTime(fechaFinOrdinal);
@@ -75,13 +76,42 @@ public class SismografoRepository
             
             if (estado != null)
             {
-                var cambio = new CambioEstado(fechaInicio, estado, new List<MotivoFueraServicio>());
+                var motivos = LoadMotivosFueraServicio(cambioEstadoId);
+                var cambio = new CambioEstado(fechaInicio, estado, motivos);
                 cambio.FechaHoraFin = fechaFin;
                 cambios.Add(cambio);
             }
         }
         
         return cambios;
+    }
+
+    /// <summary>
+    /// Loads MotivoFueraServicio entries for a given CambioEstado
+    /// </summary>
+    private List<MotivoFueraServicio> LoadMotivosFueraServicio(int cambioEstadoId)
+    {
+        var motivos = new List<MotivoFueraServicio>();
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT M.Comentario, MT.Descripcion
+            FROM MotivoFueraServicio M
+            INNER JOIN MotivoTipo MT ON MT.MotivoTipoId = M.MotivoTipoId
+            WHERE M.CambioEstadoId = @cambioId";
+        command.Parameters.AddWithValue("@cambioId", cambioEstadoId);
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var comentarioOrdinal = reader.GetOrdinal("Comentario");
+            string? comentario = reader.IsDBNull(comentarioOrdinal) ? null : reader.GetString(comentarioOrdinal);
+            var descripcion = reader.GetString(reader.GetOrdinal("Descripcion"));
+            var motivoTipo = new MotivoTipo(descripcion);
+            motivos.Add(new MotivoFueraServicio(motivoTipo, comentario));
+        }
+        return motivos;
     }
 
     /// <summary>
@@ -200,10 +230,10 @@ public class SismografoRepository
     }
 
     /// <summary>
-    /// Updates the estado of a sismografo
+    /// Updates the estado of a sismografo at the specified timestamp
     /// Maintains synchronization: updates both Sismografo.EstadoId and CambioEstado history
     /// </summary>
-    public void UpdateEstado(Sismografo sismografo, Estado nuevoEstado)
+    public void UpdateEstado(Sismografo sismografo, Estado nuevoEstado, DateTime fechaHora)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -222,7 +252,7 @@ public class SismografoRepository
                 SET FechaHoraFin = @fechaFin 
                 WHERE SismografoId = @sismografoId 
                   AND FechaHoraFin IS NULL";
-            updateCambioCommand.Parameters.AddWithValue("@fechaFin", DateTime.Now);
+            updateCambioCommand.Parameters.AddWithValue("@fechaFin", fechaHora);
             updateCambioCommand.Parameters.AddWithValue("@sismografoId", sismografoId);
             updateCambioCommand.ExecuteNonQuery();
             
@@ -233,7 +263,7 @@ public class SismografoRepository
                 VALUES (@sismografoId, @estadoId, @fechaInicio, NULL)";
             insertCommand.Parameters.AddWithValue("@sismografoId", sismografoId);
             insertCommand.Parameters.AddWithValue("@estadoId", estadoId);
-            insertCommand.Parameters.AddWithValue("@fechaInicio", DateTime.Now);
+            insertCommand.Parameters.AddWithValue("@fechaInicio", fechaHora);
             insertCommand.ExecuteNonQuery();
             
             // 3. Update Sismografo.EstadoId to keep it synchronized

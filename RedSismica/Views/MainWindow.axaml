@@ -17,9 +17,9 @@
 
         <!-- Header Bar -->
         <StackPanel Grid.Row="0" 
-                    Orientation="Horizontal" 
-                    Spacing="10"
-                    Margin="10">
+                Orientation="Horizontal" 
+                Spacing="10"
+                Margin="10">
             <Button Content="Registrar Cierre de Orden" 
                     Click="SeleccionarOpcionRegistarCierre"
                     Padding="10,5"/>
@@ -32,6 +32,14 @@
                     Click="CerrarSesion"
                     Padding="10,5"
                     HorizontalAlignment="Right"/>
+
+            <!-- Simple status indicator for background tasks (e.g., sending emails) -->
+            <TextBlock Name="StatusText"
+                   Margin="20,0,0,0"
+                   VerticalAlignment="Center"
+                   Foreground="Gray"
+                   FontSize="12"
+                   IsVisible="False"/>
         </StackPanel>
 
         <!-- Content Area with DataGrids -->
