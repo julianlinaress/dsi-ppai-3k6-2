@@ -19,11 +19,6 @@ public class Program
         DatabaseInitializer.Initialize();
         DatabaseInitializer.TestConnection();
         
-        // Demonstrate repository usage (optional - comment out for production)
-        Console.WriteLine("\n--- Testing Repository Layer ---");
-        RepositoryExample.RunExamples();
-        Console.WriteLine("--- Repository Layer Test Complete ---\n");
-        
         Console.WriteLine("Starting application...\n");
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
