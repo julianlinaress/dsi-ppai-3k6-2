@@ -17,6 +17,7 @@ namespace RedSismica.Views;
 public partial class VentanaCierreOrden : Window
 {
     private GestorCierreOrdenInspeccion? Gestor { get; set; }
+    private DatosOrdenInspeccion? _ordenSeleccionada;
     public VentanaCierreOrden()
     {
         InitializeComponent();
@@ -41,11 +42,20 @@ public partial class VentanaCierreOrden : Window
     {
         Close();
     }
-    
-    private void TomarSeleccionOrden(object? sender, RoutedEventArgs e)
+
+    private void BotonConfirmar_Click(object? sender, RoutedEventArgs e)
     {
-        if (OrdenesDataGrid.SelectedItem is not DatosOrdenInspeccion seleccion) return;
-        Gestor?.TomarSeleccionOrden(seleccion);
+        if (_ordenSeleccionada == null)
+            return;
+
+        ConfirmarButton.IsEnabled = false;
+        Gestor?.TomarSeleccionOrden(_ordenSeleccionada);
+    }
+    
+    private void TomarSeleccionOrden(object? sender, SelectionChangedEventArgs e)
+    {
+        _ordenSeleccionada = OrdenesDataGrid.SelectedItem as DatosOrdenInspeccion;
+        ConfirmarButton.IsEnabled = _ordenSeleccionada != null;
     }
 
     public void MostrarMensaje(string mensaje)
@@ -53,12 +63,25 @@ public partial class VentanaCierreOrden : Window
         OrdenesDataGrid.IsVisible = false;
         MensajeTextBlock.Text = mensaje;
         MensajeTextBlock.IsVisible = true;
+        _ordenSeleccionada = null;
+        ConfirmarButton.IsEnabled = false;
     }
 
 
     public void MostrarOrdenesParaSeleccion(IOrderedEnumerable<DatosOrdenInspeccion> ordenesData)
     {
         OrdenesDataGrid.ItemsSource = ordenesData;
+        OrdenesDataGrid.SelectedItem = null;
+        _ordenSeleccionada = null;
+        ConfirmarButton.IsEnabled = false;
+        OrdenesDataGrid.IsVisible = true;
+        MensajeTextBlock.IsVisible = false;
+    }
+
+    public async Task MostrarMensajeExito(string mensaje)
+    {
+        var box = MessageBoxManager.GetMessageBoxStandard("Éxito", mensaje, ButtonEnum.Ok);
+        await box.ShowAsync();
     }
     
     public async Task PedirConfirmacion()

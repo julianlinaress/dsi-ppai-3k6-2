@@ -233,7 +233,11 @@ public class SismografoRepository
     /// Updates the estado of a sismografo at the specified timestamp
     /// Maintains synchronization: updates both Sismografo.EstadoId and CambioEstado history
     /// </summary>
-    public void UpdateEstado(Sismografo sismografo, Estado nuevoEstado, DateTime fechaHora)
+    public void UpdateEstado(
+        Sismografo sismografo,
+        Estado nuevoEstado,
+        DateTime fechaHora,
+        IEnumerable<MotivoFueraServicio>? motivosFueraServicio = null)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -265,6 +269,24 @@ public class SismografoRepository
             insertCommand.Parameters.AddWithValue("@estadoId", estadoId);
             insertCommand.Parameters.AddWithValue("@fechaInicio", fechaHora);
             insertCommand.ExecuteNonQuery();
+            var cambioEstadoId = GetLastInsertRowId(connection);
+
+            // 2b. Persist motives (if any)
+            if (motivosFueraServicio != null)
+            {
+                foreach (var motivo in motivosFueraServicio)
+                {
+                    var motivoTipoId = GetMotivoTipoId(connection, motivo.Motivo.Descripcion);
+                    using var insertMotivoCommand = connection.CreateCommand();
+                    insertMotivoCommand.CommandText = @"
+                        INSERT INTO MotivoFueraServicio (CambioEstadoId, MotivoTipoId, Comentario)
+                        VALUES (@cambioId, @motivoTipoId, @comentario)";
+                    insertMotivoCommand.Parameters.AddWithValue("@cambioId", cambioEstadoId);
+                    insertMotivoCommand.Parameters.AddWithValue("@motivoTipoId", motivoTipoId);
+                    insertMotivoCommand.Parameters.AddWithValue("@comentario", (object?)motivo.Comentario ?? DBNull.Value);
+                    insertMotivoCommand.ExecuteNonQuery();
+                }
+            }
             
             // 3. Update Sismografo.EstadoId to keep it synchronized
             using var updateSismografoCommand = connection.CreateCommand();
@@ -289,5 +311,30 @@ public class SismografoRepository
             transaction.Rollback();
             throw;
         }
+    }
+
+    private static long GetLastInsertRowId(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = "SELECT last_insert_rowid();";
+        var result = command.ExecuteScalar();
+        return result is long value ? value : Convert.ToInt64(result ?? 0);
+    }
+
+    private int GetMotivoTipoId(SqliteConnection connection, string descripcion)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+            SELECT MotivoTipoId 
+            FROM MotivoTipo 
+            WHERE Descripcion = @descripcion";
+        command.Parameters.AddWithValue("@descripcion", descripcion);
+        var result = command.ExecuteScalar();
+        if (result != null)
+        {
+            return Convert.ToInt32(result);
+        }
+
+        throw new InvalidOperationException($"MotivoTipo '{descripcion}' no existe en la base de datos.");
     }
 }

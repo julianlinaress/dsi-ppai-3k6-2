@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Header Bar with modern design -->
@@ -193,6 +194,20 @@
                 </StackPanel>
             </Grid>
         </ScrollViewer>
+
+        <!-- Status bar for background actions (e.g., envío de mails) -->
+        <Border Grid.Row="2"
+                Background="#2563EB"
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,1,0,0"
+                Padding="20,8,20,12">
+            <TextBlock Name="StatusText"
+                       Foreground="#FFFFFF"
+                       FontStyle="Italic"
+                       FontSize="10"
+                       Text=""
+                       IsVisible="True"/>
+        </Border>
     </Grid>
     
 </Window>

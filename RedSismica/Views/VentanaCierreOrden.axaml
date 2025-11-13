@@ -45,10 +45,12 @@
                    Padding="12,8"
                    FontSize="13"/>
             <Button Content="✓ Confirmar" 
-                   Click="BotonCancelar_Click"
+                   x:Name="ConfirmarButton"
+                   Click="BotonConfirmar_Click"
                    Classes="Primary"
                    Padding="12,8"
-                   FontSize="13"/>
+                   FontSize="13"
+                   IsEnabled="False"/>
         </StackPanel>
 
         <!-- Content Area -->

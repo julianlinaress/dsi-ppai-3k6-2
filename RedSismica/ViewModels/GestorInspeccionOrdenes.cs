@@ -97,7 +97,15 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         var nuevoEstado = OrdenSeleccionada.Estacion.Sismografo.Estado;
         if (nuevoEstado != null)
         {
-            _context.Sismografos.UpdateEstado(OrdenSeleccionada.Estacion.Sismografo, nuevoEstado, fechaActual);
+            var motivos = MotivosYComentarios
+                .Select(kvp => new MotivoFueraServicio(kvp.Key, kvp.Value))
+                .ToList();
+            
+            _context.Sismografos.UpdateEstado(
+                OrdenSeleccionada.Estacion.Sismografo,
+                nuevoEstado,
+                fechaActual,
+                motivos);
         }
     }
     
@@ -108,6 +116,7 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         Debug.WriteLine("Validando datos de cierre...");
         
         if (OrdenSeleccionada == null) return; 
+        var numeroOrden = OrdenSeleccionada.NumeroOrden;
         var datosValidos = ValidarDatosCierre(Observacion, MotivosYComentarios);
         if (!datosValidos) return;
         
@@ -134,12 +143,14 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         {
             Debug.WriteLine("Enviando mails...");
             var nombreEstado = OrdenSeleccionada?.Estacion?.Sismografo?.Estado?.Nombre ?? "Fuera de Servicio";
-            await EnviarEmailsAsync(mails, nombreEstado, fechaActual, nroIdentificadorSismografo);
+            _ = EnviarEmailsAsync(mails, nombreEstado, fechaActual, nroIdentificadorSismografo);
         }
         else
         {
             Debug.WriteLine("No se encontraron mails de responsables de inspeccion...");
         }
+
+        await _boundary.MostrarMensajeExito($"La orden #{numeroOrden} se cerró correctamente.");
         
         var riLogueado = _sesion?.ObtenerRILogueado();
         if (riLogueado == null) return;

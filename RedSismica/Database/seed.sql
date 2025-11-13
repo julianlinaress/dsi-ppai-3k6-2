@@ -122,24 +122,72 @@ INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId)
 -- Seed Motivos Fuera de Servicio
 -- ============================================================================
 
--- Motivos para el segundo cambio de estado de A123 (Fuera de Servicio)
-INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId) VALUES
-    ('Falla en sensor principal', 1, 2),
-    ('Requiere calibración urgente', 4, 2);
+-- Motivos para el cambio de A123 (Fuera de Servicio)
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Falla en sensor principal',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Reparacion'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 1
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-60 days');
+
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Requiere calibración urgente',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Otro'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 1
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-60 days');
 
 -- Motivos para el estado actual de B456 (Fuera de Servicio)
-INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId) VALUES
-    ('Actualización de firmware', 2, 4),
-    ('Reemplazo de componentes', 1, 4);
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Actualización de firmware',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Renovacion'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 2
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-15 days');
 
--- Motivos para el segundo cambio de E345 (primer Fuera de Servicio)
-INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId) VALUES
-    ('Mantenimiento preventivo', 1, 6);
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Reemplazo de componentes',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Reparacion'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 2
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-15 days');
 
--- Motivos para el cuarto cambio de E345 (segundo Fuera de Servicio, actual)
-INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId) VALUES
-    ('Daño por condiciones climáticas', 1, 8),
-    ('Cambio completo de equipo', 3, 8);
+-- Motivos para el primer Fuera de Servicio de E345
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Mantenimiento preventivo',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Reparacion'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 5
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-100 days');
+
+-- Motivos para el Fuera de Servicio actual de E345
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Daño por condiciones climáticas',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Reparacion'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 5
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-10 days');
+
+INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
+SELECT 'Cambio completo de equipo',
+       (SELECT MotivoTipoId FROM MotivoTipo WHERE Descripcion = 'Cambio de Sismografo'),
+       CambioEstadoId
+FROM CambioEstado
+WHERE SismografoId = 5
+  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND FechaHoraInicio = datetime('now', '-10 days');
 
 -- ============================================================================
 -- Seed Órdenes de Inspección
