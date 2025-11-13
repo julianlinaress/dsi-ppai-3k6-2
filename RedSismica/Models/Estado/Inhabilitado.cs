@@ -16,9 +16,10 @@ public class Inhabilitado : Estado
         List<MotivoFueraServicio> motivos,
         DateTime fechaYHora,
         Sismografo self,
-        List<CambioEstado> cambiosDeEstado)
+        List<CambioEstado>? cambiosDeEstado)
     {
         // Finalizar el cambio de estado actual
+        if (cambiosDeEstado == null) return;
         var cambioActual = cambiosDeEstado.Find(c => c.EsEstadoActual());
         if (cambioActual != null)
         {

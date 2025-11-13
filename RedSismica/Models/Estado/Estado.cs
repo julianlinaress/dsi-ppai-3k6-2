@@ -34,7 +34,7 @@ public abstract class Estado
         List<MotivoFueraServicio> motivos,
         DateTime fechaYHora,
         Sismografo self,
-        List<CambioEstado> cambiosDeEstado)
+        List<CambioEstado>? cambiosDeEstado)
     {
         throw new NotImplementedException("Método no implementado para este estado.");
     }

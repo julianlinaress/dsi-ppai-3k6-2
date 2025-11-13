@@ -21,12 +21,10 @@ public class EstacionSismologica(string nombre, Sismografo sismografo)
         }
         
         // Delegar al estado del sismógrafo (patrón State)
-        Sismografo.Estado.FueraDeServicio(
+        Sismografo.PonerSismografoEnFueraDeServicio(
             responsable: responsable!,
             motivos: motivosFueraServicio,
-            fechaYHora: fechaYHora,
-            self: Sismografo,
-            cambiosDeEstado: Sismografo.CambioEstado
+            fechaYHora: fechaYHora
         );
     }
 

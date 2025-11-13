@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RedSismica.Models;
@@ -16,6 +17,21 @@ public class Sismografo(string nombre)
     /// This provides efficient access without querying the CambioEstado list
     /// </summary>
     public Estado? Estado { get; set; }
+
+    public void PonerSismografoEnFueraDeServicio(            
+            Empleado responsable,
+            List<MotivoFueraServicio> motivos,
+            DateTime fechaYHora
+        )
+    {
+        Estado?.FueraDeServicio(
+            responsable: responsable,
+            motivos: motivos,
+            fechaYHora: fechaYHora,
+            self: this,
+            cambiosDeEstado: CambioEstado
+        );
+    }
 
     public DatosSismografo ObtenerDatos()
     {
