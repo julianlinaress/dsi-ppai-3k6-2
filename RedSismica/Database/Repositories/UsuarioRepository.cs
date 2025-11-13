@@ -17,6 +17,16 @@ public class UsuarioRepository
         _connectionString = connectionString;
     }
 
+    private const string BaseSelectQuery = @"
+        SELECT 
+            u.UsuarioId, u.Nombre, u.Password, u.EsRi, u.EmpleadoId,
+            e.Nombre AS EmpleadoNombre, e.Apellido AS EmpleadoApellido,
+            e.Telefono AS EmpleadoTelefono, e.Mail AS EmpleadoMail,
+            r.Nombre AS RolNombre, r.DescripcionRol AS RolDescripcion
+        FROM Usuario u
+        LEFT JOIN Empleado e ON e.EmpleadoId = u.EmpleadoId
+        LEFT JOIN Rol r ON r.RolId = e.RolId";
+
     /// <summary>
     /// Materializes a Usuario from a database row
     /// </summary>
@@ -27,7 +37,43 @@ public class UsuarioRepository
         var password = reader.GetString(reader.GetOrdinal("Password"));
         var esRi = reader.GetBoolean(reader.GetOrdinal("EsRi"));
         
-        return new Usuario(id, nombre, password, esRi);
+        var usuario = new Usuario(id, nombre, password, esRi);
+        var empleadoIdOrdinal = reader.GetOrdinal("EmpleadoId");
+        if (!reader.IsDBNull(empleadoIdOrdinal))
+        {
+            var empleadoNombre = SafeGetString(reader, "EmpleadoNombre");
+            var empleadoApellido = SafeGetString(reader, "EmpleadoApellido");
+            var empleadoTelefono = SafeGetString(reader, "EmpleadoTelefono");
+            var empleadoMail = SafeGetString(reader, "EmpleadoMail");
+            var rolNombre = SafeGetString(reader, "RolNombre") ?? "Desconocido";
+            var rolDescripcion = SafeGetString(reader, "RolDescripcion");
+
+            var rol = new Rol(rolNombre)
+            {
+                DescripcionRol = rolDescripcion
+            };
+
+            var empleado = new Empleado(
+                empleadoNombre ?? string.Empty,
+                empleadoApellido ?? string.Empty,
+                empleadoTelefono ?? string.Empty,
+                empleadoMail ?? string.Empty,
+                rol);
+            empleado.Mail = empleadoMail;
+            empleado.Telefono = empleadoTelefono;
+            empleado.Nombre = empleadoNombre;
+            empleado.Apellido = empleadoApellido;
+
+            usuario.AsignarEmpleado(empleado);
+        }
+
+        return usuario;
+    }
+
+    private static string? SafeGetString(SqliteDataReader reader, string columnName)
+    {
+        var ordinal = reader.GetOrdinal(columnName);
+        return reader.IsDBNull(ordinal) ? null : reader.GetString(ordinal);
     }
 
     /// <summary>
@@ -41,10 +87,7 @@ public class UsuarioRepository
         connection.Open();
         
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UsuarioId, Nombre, Password, EsRi, EmpleadoId 
-            FROM Usuario 
-            ORDER BY Nombre";
+        command.CommandText = BaseSelectQuery + " ORDER BY u.Nombre";
         
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -64,10 +107,7 @@ public class UsuarioRepository
         connection.Open();
         
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UsuarioId, Nombre, Password, EsRi, EmpleadoId 
-            FROM Usuario 
-            WHERE UsuarioId = @id";
+        command.CommandText = BaseSelectQuery + " WHERE u.UsuarioId = @id";
         command.Parameters.AddWithValue("@id", id);
         
         using var reader = command.ExecuteReader();
@@ -88,10 +128,7 @@ public class UsuarioRepository
         connection.Open();
         
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UsuarioId, Nombre, Password, EsRi, EmpleadoId 
-            FROM Usuario 
-            WHERE Nombre = @nombre";
+        command.CommandText = BaseSelectQuery + " WHERE u.Nombre = @nombre";
         command.Parameters.AddWithValue("@nombre", nombre);
         
         using var reader = command.ExecuteReader();
@@ -112,10 +149,7 @@ public class UsuarioRepository
         connection.Open();
         
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UsuarioId, Nombre, Password, EsRi, EmpleadoId 
-            FROM Usuario 
-            WHERE Nombre = @nombre AND Password = @password";
+        command.CommandText = BaseSelectQuery + " WHERE u.Nombre = @nombre AND u.Password = @password";
         command.Parameters.AddWithValue("@nombre", nombre);
         command.Parameters.AddWithValue("@password", password);
         
@@ -139,11 +173,7 @@ public class UsuarioRepository
         connection.Open();
         
         using var command = connection.CreateCommand();
-        command.CommandText = @"
-            SELECT UsuarioId, Nombre, Password, EsRi, EmpleadoId 
-            FROM Usuario 
-            WHERE EsRi = 1 
-            ORDER BY Nombre";
+        command.CommandText = BaseSelectQuery + " WHERE u.EsRi = 1 ORDER BY u.Nombre";
         
         using var reader = command.ExecuteReader();
         while (reader.Read())

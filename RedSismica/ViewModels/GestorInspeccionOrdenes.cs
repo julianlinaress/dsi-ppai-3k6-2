@@ -5,6 +5,7 @@ using System.Linq;
 using RedSismica.Models;
 using RedSismica.Views;
 using RedSismica.Database;
+using System.Threading.Tasks;
 
 namespace RedSismica.ViewModels;
 
@@ -165,7 +166,7 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         _boundary.MostrarOrdenesParaSeleccion(ordenesPorFecha);
     }
 
-    private async System.Threading.Tasks.Task EnviarEmailsAsync(
+    private async Task EnviarEmailsAsync(
         List<string?> mails,
         string nombreEstadoFueraServicio,
         DateTime fechaHoraCambioEstado,
@@ -187,7 +188,7 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
             enviados++;
             mainWindow?.ActualizarEstadoEnvio($"Enviando mails {enviados}/{total}");
             Debug.WriteLine($"[Email] Enviando {enviados}/{total} a {mail}");
-            await System.Threading.Tasks.Task.Run(() =>
+            await Task.Run(() =>
             {
                 InterfazEmail.EnviarEmails(mail, "Cierre de Orden de Inspección", mensaje);
             });
@@ -208,12 +209,11 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
 
     private List<string?> ObtenerResponsablesDeInspeccion()
     {
-        // For now, return hardcoded emails from seed data
-        // Later: implement EmpleadoRepository to load from database
-        return
-        [
-            "julian@linares.com.ar"
-        ];
+        return _context.Usuarios.GetAll()
+            .Where(u => u.EsRi)
+            .Select(u => u.ObtenerEmpleado()?.Mail)
+            .Where(mail => !string.IsNullOrWhiteSpace(mail))
+            .ToList();
     }
 
     private static string FormatearMotivosYComentarios(Dictionary<MotivoTipo, string> motivosYComentarios)
@@ -229,6 +229,4 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
     {
         return _context.Estados.GetByNombreAndAmbito("Cerrada", "Orden de Inspección");
     }
-
-    // Eliminado: obtener estado de FdS de repositorio no es necesario, el patrón State lo crea
 }

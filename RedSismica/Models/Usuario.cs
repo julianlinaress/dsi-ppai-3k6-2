@@ -16,6 +16,11 @@ public class Usuario(int id, string nombre, string password, bool esRi)
         return Empleado;
     }
 
+    public void AsignarEmpleado(Empleado? empleado)
+    {
+        Empleado = empleado;
+    }
+
     public DatosUsuario ObtenerDatos()
     {
         return new DatosUsuario

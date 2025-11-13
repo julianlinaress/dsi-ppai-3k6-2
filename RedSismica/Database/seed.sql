@@ -42,7 +42,7 @@ INSERT INTO Empleado (Nombre, Apellido, Telefono, Mail, RolId) VALUES
 
 INSERT INTO Usuario (Nombre, Password, EsRi, EmpleadoId) VALUES
     ('jlinares', '123', 1, 1),
-    ('mperez', '123', 1, NULL),
+    ('mperez', '123', 0, NULL),
     ('cgomez', '123', 1, NULL);
 
 -- ============================================================================
