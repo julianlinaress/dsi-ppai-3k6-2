@@ -8,9 +8,27 @@
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Brushes -->
+            <SolidColorBrush x:Key="PrimaryBrush" Color="#2563EB"/>
+            <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#1D4ED8"/>
+            <SolidColorBrush x:Key="PrimaryLightBrush" Color="#DBEAFE"/>
+            <SolidColorBrush x:Key="SecondaryBrush" Color="#10B981"/>
+            <SolidColorBrush x:Key="DangerBrush" Color="#EF4444"/>
+            <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B"/>
+            <SolidColorBrush x:Key="SuccessBrush" Color="#10B981"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1F2937"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#6B7280"/>
+            <SolidColorBrush x:Key="BackgroundPrimaryBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="#F9FAFB"/>
+            <SolidColorBrush x:Key="BorderBrush" Color="#E5E7EB"/>
+        </ResourceDictionary>
+    </Application.Resources>
     
     <Application.Styles>
         <SimpleTheme/>
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Simple.xaml"/>
+        <StyleInclude Source="/Styles/GlobalStyles.axaml"/>
     </Application.Styles>
 </Application>
