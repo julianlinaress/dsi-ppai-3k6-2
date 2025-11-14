@@ -22,7 +22,7 @@ public class SismografoRepository
 
     /// <summary>
     /// Materializes a Sismografo from a database row (without relationships)
-    /// EstadoId is stored in the database and kept synchronized with active CambioEstado
+    /// EstadoSismografoId is stored in the database and kept synchronized with active CambioEstado
     /// </summary>
     private Sismografo MaterializeSismografo(SqliteDataReader reader)
     {
@@ -34,12 +34,12 @@ public class SismografoRepository
         var property = typeof(Sismografo).GetProperty("IdentificadorSismografo");
         property?.SetValue(sismografo, identificador);
         
-        // Load Estado from EstadoId foreign key
-        var estadoIdOrdinal = reader.GetOrdinal("EstadoId");
+        // Load Estado from EstadoSismografoId foreign key
+        var estadoIdOrdinal = reader.GetOrdinal("EstadoSismografoId");
         if (!reader.IsDBNull(estadoIdOrdinal))
         {
             var estadoId = reader.GetInt32(estadoIdOrdinal);
-            var estado = _estadoRepository.GetById(estadoId);
+            var estado = _estadoRepository.GetSismografoById(estadoId);
             sismografo.Estado = estado;
         }
         
@@ -58,7 +58,7 @@ public class SismografoRepository
         
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT CE.CambioEstadoId, CE.FechaHoraInicio, CE.FechaHoraFin, CE.EstadoId
+            SELECT CE.CambioEstadoId, CE.FechaHoraInicio, CE.FechaHoraFin, CE.EstadoSismografoId
             FROM CambioEstado CE
             WHERE CE.SismografoId = @sismografoId
             ORDER BY CE.FechaHoraInicio";
@@ -71,8 +71,8 @@ public class SismografoRepository
             var fechaInicio = reader.GetDateTime(reader.GetOrdinal("FechaHoraInicio"));
             var fechaFinOrdinal = reader.GetOrdinal("FechaHoraFin");
             DateTime? fechaFin = reader.IsDBNull(fechaFinOrdinal) ? null : reader.GetDateTime(fechaFinOrdinal);
-            var estadoId = reader.GetInt32(reader.GetOrdinal("EstadoId"));
-            var estado = _estadoRepository.GetById(estadoId);
+            var estadoId = reader.GetInt32(reader.GetOrdinal("EstadoSismografoId"));
+            var estado = _estadoRepository.GetSismografoById(estadoId);
             
             if (estado != null)
             {
@@ -126,7 +126,7 @@ public class SismografoRepository
         
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoId 
+            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoSismografoId 
             FROM Sismografo 
             ORDER BY IdentificadorSismografo";
         
@@ -155,7 +155,7 @@ public class SismografoRepository
         
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoId 
+            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoSismografoId 
             FROM Sismografo 
             WHERE SismografoId = @id";
         command.Parameters.AddWithValue("@id", id);
@@ -185,7 +185,7 @@ public class SismografoRepository
         
         using var command = connection.CreateCommand();
         command.CommandText = @"
-            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoId 
+            SELECT SismografoId, IdentificadorSismografo, Nombre, EstadoSismografoId 
             FROM Sismografo 
             WHERE IdentificadorSismografo = @identificador";
         command.Parameters.AddWithValue("@identificador", identificador);
@@ -231,11 +231,11 @@ public class SismografoRepository
 
     /// <summary>
     /// Updates the estado of a sismografo at the specified timestamp
-    /// Maintains synchronization: updates both Sismografo.EstadoId and CambioEstado history
+    /// Maintains synchronization: updates both Sismografo.EstadoSismografoId and CambioEstado history
     /// </summary>
     public void UpdateEstado(
         Sismografo sismografo,
-        Estado nuevoEstado,
+        EstadoSismografo nuevoEstado,
         DateTime fechaHora,
         IEnumerable<MotivoFueraServicio>? motivosFueraServicio = null)
     {
@@ -263,7 +263,7 @@ public class SismografoRepository
             // 2. Insert new CambioEstado
             using var insertCommand = connection.CreateCommand();
             insertCommand.CommandText = @"
-                INSERT INTO CambioEstado (SismografoId, EstadoId, FechaHoraInicio, FechaHoraFin)
+                INSERT INTO CambioEstado (SismografoId, EstadoSismografoId, FechaHoraInicio, FechaHoraFin)
                 VALUES (@sismografoId, @estadoId, @fechaInicio, NULL)";
             insertCommand.Parameters.AddWithValue("@sismografoId", sismografoId);
             insertCommand.Parameters.AddWithValue("@estadoId", estadoId);
@@ -288,11 +288,11 @@ public class SismografoRepository
                 }
             }
             
-            // 3. Update Sismografo.EstadoId to keep it synchronized
+            // 3. Update Sismografo.EstadoSismografoId to keep it synchronized
             using var updateSismografoCommand = connection.CreateCommand();
             updateSismografoCommand.CommandText = @"
                 UPDATE Sismografo 
-                SET EstadoId = @estadoId 
+                SET EstadoSismografoId = @estadoId 
                 WHERE SismografoId = @sismografoId";
             updateSismografoCommand.Parameters.AddWithValue("@estadoId", estadoId);
             updateSismografoCommand.Parameters.AddWithValue("@sismografoId", sismografoId);

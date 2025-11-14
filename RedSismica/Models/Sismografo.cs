@@ -12,7 +12,7 @@ public class Sismografo(string nombre)
     public int IdentificadorSismografo { get; private set; } = _contador++;
     public List<CambioEstado> CambioEstado { get; set; } = [];
     
-    public Estado? Estado { get; set; }
+    public EstadoSismografo? Estado { get; set; }
 
     public void PonerSismografoEnFueraDeServicio(            
             Empleado responsable,

@@ -12,18 +12,23 @@ DROP TABLE IF EXISTS Sismografo;
 DROP TABLE IF EXISTS Usuario;
 DROP TABLE IF EXISTS Empleado;
 DROP TABLE IF EXISTS Rol;
-DROP TABLE IF EXISTS Estado;
+DROP TABLE IF EXISTS EstadoSismografo;
+DROP TABLE IF EXISTS EstadoOrden;
 
 -- ============================================================================
 -- Core Catalog Tables
 -- ============================================================================
 
--- Estados: Can be for "Orden de Inspección" or "Sismografo"
-CREATE TABLE Estado (
-    EstadoId INTEGER PRIMARY KEY AUTOINCREMENT,
-    Nombre VARCHAR(100) NOT NULL,
-    Ambito VARCHAR(50) NOT NULL, -- 'Orden de Inspección' or 'Sismografo'
-    UNIQUE(Nombre, Ambito)
+-- Estados para Ordenes de Inspección
+CREATE TABLE EstadoOrden (
+    EstadoOrdenId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Estados para Sismógrafos
+CREATE TABLE EstadoSismografo (
+    EstadoSismografoId INTEGER PRIMARY KEY AUTOINCREMENT,
+    Nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- Roles del sistema
@@ -64,14 +69,14 @@ CREATE TABLE Usuario (
 -- ============================================================================
 
 -- Sismógrafos
--- EstadoId is kept synchronized with the active CambioEstado record (FechaHoraFin IS NULL)
+-- EstadoSismografoId is kept synchronized with the active CambioEstado record (FechaHoraFin IS NULL)
 -- This provides efficient querying while maintaining state history in CambioEstado
 CREATE TABLE Sismografo (
     SismografoId INTEGER PRIMARY KEY AUTOINCREMENT,
     IdentificadorSismografo INTEGER NOT NULL UNIQUE,
     Nombre VARCHAR(200) NOT NULL,
-    EstadoId INTEGER NOT NULL,
-    FOREIGN KEY (EstadoId) REFERENCES Estado(EstadoId)
+    EstadoSismografoId INTEGER NOT NULL,
+    FOREIGN KEY (EstadoSismografoId) REFERENCES EstadoSismografo(EstadoSismografoId)
 );
 
 -- Estaciones Sismológicas
@@ -96,11 +101,11 @@ CREATE TABLE MotivoTipo (
 CREATE TABLE CambioEstado (
     CambioEstadoId INTEGER PRIMARY KEY AUTOINCREMENT,
     SismografoId INTEGER NOT NULL,
-    EstadoId INTEGER NOT NULL,
+    EstadoSismografoId INTEGER NOT NULL,
     FechaHoraInicio DATETIME NOT NULL,
     FechaHoraFin DATETIME,
     FOREIGN KEY (SismografoId) REFERENCES Sismografo(SismografoId),
-    FOREIGN KEY (EstadoId) REFERENCES Estado(EstadoId),
+    FOREIGN KEY (EstadoSismografoId) REFERENCES EstadoSismografo(EstadoSismografoId),
     CHECK (FechaHoraFin IS NULL OR FechaHoraFin >= FechaHoraInicio)
 );
 
@@ -125,10 +130,10 @@ CREATE TABLE OrdenDeInspeccion (
     FechaFinalizacion DATETIME NOT NULL,
     FechaHoraCierre DATETIME,
     ResponsableInspeccionId INTEGER NOT NULL,
-    EstadoId INTEGER NOT NULL,
+    EstadoOrdenId INTEGER NOT NULL,
     EstacionId INTEGER NOT NULL,
     FOREIGN KEY (ResponsableInspeccionId) REFERENCES Usuario(UsuarioId),
-    FOREIGN KEY (EstadoId) REFERENCES Estado(EstadoId),
+    FOREIGN KEY (EstadoOrdenId) REFERENCES EstadoOrden(EstadoOrdenId),
     FOREIGN KEY (EstacionId) REFERENCES EstacionSismologica(EstacionId)
 );
 
@@ -142,7 +147,7 @@ CREATE INDEX idx_cambio_estado_sismografo ON CambioEstado(SismografoId);
 CREATE INDEX idx_cambio_estado_actual ON CambioEstado(SismografoId, FechaHoraFin) 
     WHERE FechaHoraFin IS NULL;
 CREATE INDEX idx_orden_responsable ON OrdenDeInspeccion(ResponsableInspeccionId);
-CREATE INDEX idx_orden_estado ON OrdenDeInspeccion(EstadoId);
+CREATE INDEX idx_orden_estado ON OrdenDeInspeccion(EstadoOrdenId);
 CREATE INDEX idx_orden_numero ON OrdenDeInspeccion(NumeroOrden);
 CREATE INDEX idx_sismografo_identificador ON Sismografo(IdentificadorSismografo);
 

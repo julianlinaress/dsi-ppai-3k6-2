@@ -31,12 +31,12 @@ public class OrdenDeInspeccionRepository
         var numeroOrden = reader.GetInt32(reader.GetOrdinal("NumeroOrden"));
         var fechaFinalizacion = DateTime.Parse(reader.GetString(reader.GetOrdinal("FechaFinalizacion")));
         var responsableId = reader.GetInt32(reader.GetOrdinal("ResponsableInspeccionId"));
-        var estadoId = reader.GetInt32(reader.GetOrdinal("EstadoId"));
+        var estadoId = reader.GetInt32(reader.GetOrdinal("EstadoOrdenId"));
         var estacionId = reader.GetInt32(reader.GetOrdinal("EstacionId"));
         
         // Load related entities
         var responsable = _usuarioRepository.GetById(responsableId);
-        var estado = _estadoRepository.GetById(estadoId);
+        var estado = _estadoRepository.GetOrdenById(estadoId);
         var estacion = _estacionRepository.GetById(estacionId);
         
         if (estado == null)
@@ -76,7 +76,7 @@ public class OrdenDeInspeccionRepository
         using var command = connection.CreateCommand();
         command.CommandText = @"
             SELECT OrdenId, NumeroOrden, FechaFinalizacion, FechaHoraCierre, 
-                   ResponsableInspeccionId, EstadoId, EstacionId 
+                   ResponsableInspeccionId, EstadoOrdenId, EstacionId 
             FROM OrdenDeInspeccion 
             ORDER BY NumeroOrden";
         
@@ -105,7 +105,7 @@ public class OrdenDeInspeccionRepository
         using var command = connection.CreateCommand();
         command.CommandText = @"
             SELECT OrdenId, NumeroOrden, FechaFinalizacion, FechaHoraCierre, 
-                   ResponsableInspeccionId, EstadoId, EstacionId 
+                   ResponsableInspeccionId, EstadoOrdenId, EstacionId 
             FROM OrdenDeInspeccion 
             WHERE NumeroOrden = @numeroOrden";
         command.Parameters.AddWithValue("@numeroOrden", numeroOrden);
@@ -132,7 +132,7 @@ public class OrdenDeInspeccionRepository
         using var command = connection.CreateCommand();
         command.CommandText = @"
             SELECT OrdenId, NumeroOrden, FechaFinalizacion, FechaHoraCierre, 
-                   ResponsableInspeccionId, EstadoId, EstacionId 
+                   ResponsableInspeccionId, EstadoOrdenId, EstacionId 
             FROM OrdenDeInspeccion 
             WHERE ResponsableInspeccionId = @responsableId
             ORDER BY FechaFinalizacion DESC";
@@ -160,12 +160,11 @@ public class OrdenDeInspeccionRepository
         using var command = connection.CreateCommand();
         command.CommandText = @"
             SELECT o.OrdenId, o.NumeroOrden, o.FechaFinalizacion, o.FechaHoraCierre, 
-                   o.ResponsableInspeccionId, o.EstadoId, o.EstacionId 
+                   o.ResponsableInspeccionId, o.EstadoOrdenId, o.EstacionId 
             FROM OrdenDeInspeccion o
-            JOIN Estado e ON o.EstadoId = e.EstadoId
+            JOIN EstadoOrden e ON o.EstadoOrdenId = e.EstadoOrdenId
             WHERE o.ResponsableInspeccionId = @responsableId
               AND e.Nombre = 'Completamente Realizada'
-              AND e.Ambito = 'Orden de Inspección'
             ORDER BY o.FechaFinalizacion DESC";
         command.Parameters.AddWithValue("@responsableId", responsable.Id);
         
@@ -191,7 +190,7 @@ public class OrdenDeInspeccionRepository
         using var command = connection.CreateCommand();
         command.CommandText = @"
             UPDATE OrdenDeInspeccion 
-            SET EstadoId = @estadoId, 
+            SET EstadoOrdenId = @estadoId, 
                 FechaHoraCierre = @fechaHoraCierre 
             WHERE NumeroOrden = @numeroOrden";
         command.Parameters.AddWithValue("@estadoId", estadoId);

@@ -7,14 +7,20 @@
 -- Seed Estados (States)
 -- ============================================================================
 
-INSERT INTO Estado (Nombre, Ambito) VALUES
-    ('Completamente Realizada', 'Orden de Inspección'),
-    ('En Proceso', 'Orden de Inspección'),
-    ('Algun Estado', 'Orden de Inspección'),
-    ('Estado Inicial', 'Orden de Inspección'),
-    ('Cerrada', 'Orden de Inspección'),
-    ('Fuera de Servicio', 'Sismografo'),
-    ('Inhabilitado', 'Sismografo');
+INSERT INTO EstadoOrden (Nombre) VALUES
+    ('Completamente Realizada'),
+    ('En Proceso'),
+    ('Algun Estado'),
+    ('Estado Inicial'),
+    ('Cerrada');
+
+INSERT INTO EstadoSismografo (Nombre) VALUES
+    ('Fuera de Servicio'),
+    ('Inhabilitado'),
+    ('Disponible'),
+    ('En Instalación'),
+    ('Reclamado'),
+    ('En Línea');
 
 -- ============================================================================
 -- Seed Roles
@@ -48,17 +54,17 @@ INSERT INTO Usuario (Nombre, Password, EsRi, EmpleadoId) VALUES
 -- ============================================================================
 -- Seed Sismógrafos
 -- Starting ID counter at 18122021 as per original code
--- EstadoId reflects current state and is kept synchronized with active CambioEstado
--- EstadoId 6 = Fuera de Servicio, EstadoId 7 = Inhabilitado
+-- EstadoSismografoId reflects current state and is kept synchronized with active CambioEstado
+-- They reference entries inserted in EstadoSismografo
 -- ============================================================================
 
-INSERT INTO Sismografo (IdentificadorSismografo, Nombre, EstadoId) VALUES
-    (18122021, 'Sismógrafo A123', 7),  -- Inhabilitado (matches CambioEstado)
-    (18122022, 'Sismógrafo B456', 6),  -- Fuera de Servicio (matches CambioEstado)
-    (18122023, 'Sismógrafo C789', 7),  -- Inhabilitado (matches CambioEstado)
-    (18122024, 'Sismógrafo D012', 7),  -- Inhabilitado (matches CambioEstado)
-    (18122025, 'Sismógrafo E345', 6),  -- Fuera de Servicio (matches CambioEstado)
-    (18122026, 'Sismógrafo F678', 7);  -- Inhabilitado (matches CambioEstado)
+INSERT INTO Sismografo (IdentificadorSismografo, Nombre, EstadoSismografoId) VALUES
+    (18122021, 'Sismógrafo A123', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (18122022, 'Sismógrafo B456', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')),
+    (18122023, 'Sismógrafo C789', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (18122024, 'Sismógrafo D012', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (18122025, 'Sismógrafo E345', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')),
+    (18122026, 'Sismógrafo F678', (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado'));
 
 -- ============================================================================
 -- Seed Estaciones Sismológicas
@@ -89,34 +95,34 @@ INSERT INTO MotivoTipo (Descripcion) VALUES
 -- ============================================================================
 
 -- Sismógrafo A123 - Historial: Inhabilitado -> Fuera de Servicio -> Inhabilitado
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-120 days'), datetime('now', '-60 days'), 1, 7), -- Inhabilitado
-    (datetime('now', '-60 days'), datetime('now', '-30 days'), 1, 6),  -- Fuera de Servicio
-    (datetime('now', '-30 days'), NULL, 1, 7);                          -- Inhabilitado (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-120 days'), datetime('now', '-60 days'), 1, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (datetime('now', '-60 days'), datetime('now', '-30 days'), 1, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')),
+    (datetime('now', '-30 days'), NULL, 1, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado'));
 
 -- Sismógrafo B456 - Historial: Inhabilitado -> Fuera de Servicio
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-90 days'), datetime('now', '-15 days'), 2, 7),  -- Inhabilitado
-    (datetime('now', '-15 days'), NULL, 2, 6);                          -- Fuera de Servicio (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-90 days'), datetime('now', '-15 days'), 2, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (datetime('now', '-15 days'), NULL, 2, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio'));
 
 -- Sismógrafo C789 - Historial: Solo Inhabilitado
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-180 days'), NULL, 3, 7);                         -- Inhabilitado (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-180 days'), NULL, 3, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado'));
 
 -- Sismógrafo D012 - Historial: Inhabilitado todo el tiempo
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-200 days'), NULL, 4, 7);                         -- Inhabilitado (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-200 days'), NULL, 4, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado'));
 
 -- Sismógrafo E345 - Historial: Inhabilitado -> Fuera de Servicio -> Inhabilitado -> Fuera de Servicio
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-150 days'), datetime('now', '-100 days'), 5, 7), -- Inhabilitado
-    (datetime('now', '-100 days'), datetime('now', '-50 days'), 5, 6),  -- Fuera de Servicio
-    (datetime('now', '-50 days'), datetime('now', '-10 days'), 5, 7),   -- Inhabilitado
-    (datetime('now', '-10 days'), NULL, 5, 6);                           -- Fuera de Servicio (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-150 days'), datetime('now', '-100 days'), 5, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (datetime('now', '-100 days'), datetime('now', '-50 days'), 5, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')),
+    (datetime('now', '-50 days'), datetime('now', '-10 days'), 5, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado')),
+    (datetime('now', '-10 days'), NULL, 5, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio'));
 
 -- Sismógrafo F678 - Historial: Inhabilitado desde el inicio
-INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoId) VALUES
-    (datetime('now', '-365 days'), NULL, 6, 7);                         -- Inhabilitado (actual)
+INSERT INTO CambioEstado (FechaHoraInicio, FechaHoraFin, SismografoId, EstadoSismografoId) VALUES
+    (datetime('now', '-365 days'), NULL, 6, (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Inhabilitado'));
 
 -- ============================================================================
 -- Seed Motivos Fuera de Servicio
@@ -129,7 +135,7 @@ SELECT 'Falla en sensor principal',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 1
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-60 days');
 
 INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
@@ -138,7 +144,7 @@ SELECT 'Requiere calibración urgente',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 1
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-60 days');
 
 -- Motivos para el estado actual de B456 (Fuera de Servicio)
@@ -148,7 +154,7 @@ SELECT 'Actualización de firmware',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 2
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-15 days');
 
 INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
@@ -157,7 +163,7 @@ SELECT 'Reemplazo de componentes',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 2
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-15 days');
 
 -- Motivos para el primer Fuera de Servicio de E345
@@ -167,7 +173,7 @@ SELECT 'Mantenimiento preventivo',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 5
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-100 days');
 
 -- Motivos para el Fuera de Servicio actual de E345
@@ -177,7 +183,7 @@ SELECT 'Daño por condiciones climáticas',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 5
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-10 days');
 
 INSERT INTO MotivoFueraServicio (Comentario, MotivoTipoId, CambioEstadoId)
@@ -186,7 +192,7 @@ SELECT 'Cambio completo de equipo',
        CambioEstadoId
 FROM CambioEstado
 WHERE SismografoId = 5
-  AND EstadoId = (SELECT EstadoId FROM Estado WHERE Nombre = 'Fuera de Servicio' AND Ambito = 'Sismografo')
+  AND EstadoSismografoId = (SELECT EstadoSismografoId FROM EstadoSismografo WHERE Nombre = 'Fuera de Servicio')
   AND FechaHoraInicio = datetime('now', '-10 days');
 
 -- ============================================================================
@@ -194,20 +200,22 @@ WHERE SismografoId = 5
 -- Using date calculations relative to current date
 -- ============================================================================
 
-INSERT INTO OrdenDeInspeccion (NumeroOrden, FechaFinalizacion, FechaHoraCierre, ResponsableInspeccionId, EstadoId, EstacionId) VALUES
-    (1, datetime('now', '-5 days'), NULL, 1, 1, 1),  -- jlinares, Completamente Realizada, Estación Norte
-    (3, datetime('now', '-12 days'), NULL, 2, 1, 3), -- mperez, Completamente Realizada, Estación Este
-    (4, datetime('now', '-23 days'), NULL, 1, 1, 4), -- jlinares, Completamente Realizada, Estación Oeste
-    (5, datetime('now', '-54 days'), NULL, 2, 1, 5), -- mperez, Completamente Realizada, Estación Centro
-    (6, datetime('now', '-2 days'), NULL, 2, 1, 6),  -- mperez, Completamente Realizada, Estación Patagonia
-    (8, datetime('now', '-3 days'), NULL, 2, 1, 2);  -- mperez, Completamente Realizada, Estación Sur
+INSERT INTO OrdenDeInspeccion (NumeroOrden, FechaFinalizacion, FechaHoraCierre, ResponsableInspeccionId, EstadoOrdenId, EstacionId) VALUES
+    (1, datetime('now', '-5 days'), NULL, 1, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 1),
+    (3, datetime('now', '-12 days'), NULL, 2, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 3),
+    (4, datetime('now', '-23 days'), NULL, 1, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 4),
+    (5, datetime('now', '-54 days'), NULL, 2, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 5),
+    (6, datetime('now', '-2 days'), NULL, 2, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 6),
+    (8, datetime('now', '-3 days'), NULL, 2, (SELECT EstadoOrdenId FROM EstadoOrden WHERE Nombre = 'Completamente Realizada'), 2);
 
 -- ============================================================================
 -- Verify Data
 -- ============================================================================
 
 -- Uncomment to verify inserted data
--- SELECT 'Estados' as Tabla, COUNT(*) as Cantidad FROM Estado
+-- SELECT 'EstadosOrden' as Tabla, COUNT(*) as Cantidad FROM EstadoOrden
+-- UNION ALL
+-- SELECT 'EstadosSismografo', COUNT(*) FROM EstadoSismografo
 -- UNION ALL
 -- SELECT 'Roles', COUNT(*) FROM Rol
 -- UNION ALL

@@ -228,6 +228,6 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
 
     private Estado? BuscarEstadoCierre()
     {
-        return _context.Estados.GetByNombreAndAmbito("Cerrada", "Orden de Inspección");
+        return _context.Estados.GetOrdenByNombre("Cerrada");
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace RedSismica.Models;
 
-public class Inhabilitado : Estado
+public class Inhabilitado : EstadoSismografo
 {
-    public Inhabilitado() : base("Inhabilitado", "Sismografo")
+    public Inhabilitado() : base("Inhabilitado")
     {
     }
 
@@ -42,7 +42,7 @@ public class Inhabilitado : Estado
     }
 
     private static CambioEstado CrearNuevoCambioDeEstado(
-        Estado estado,
+        EstadoSismografo estado,
         DateTime fechaYHora,
         List<MotivoFueraServicio> motivos,
         Empleado responsable)
