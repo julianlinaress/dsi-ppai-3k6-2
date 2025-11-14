@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RedSismica.Models;
 
@@ -14,7 +15,14 @@ public class OrdenDeInspeccion(
     private DateTime? FechaHoraCierre { get; set; }
     private Usuario? ResponsableInspeccion { get; set; } = responsableInspeccion;
     private Estado Estado { get; set; } = estado;
+
+    // TODO: Make private
     public EstacionSismologica Estacion { get; set; } = estacion;
+
+    public void PonerSismografoEnFueraDeServicio(Dictionary<MotivoTipo, string> motivosYComentarios, DateTime fechaActual, Empleado? responsable)
+    {
+        Estacion.PonerSismografoEnFueraDeServicio(motivosYComentarios, fechaActual, responsable);
+    }
 
     public bool EsDeRi(Usuario ri)
     {

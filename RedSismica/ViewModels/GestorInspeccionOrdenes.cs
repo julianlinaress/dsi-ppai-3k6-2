@@ -92,7 +92,8 @@ public class GestorCierreOrdenInspeccion(VentanaCierreOrden boundary) : ViewMode
         
         // Update domain object
         Empleado? responsable = _sesion?.ObtenerRILogueado()?.ObtenerEmpleado();
-        OrdenSeleccionada.Estacion.PonerSismografoEnFueraDeServicio(MotivosYComentarios, fechaActual, responsable);
+        
+        OrdenSeleccionada.PonerSismografoEnFueraDeServicio(MotivosYComentarios, fechaActual, responsable);
         
         // Persist to database
         var nuevoEstado = OrdenSeleccionada.Estacion.Sismografo.Estado;

@@ -13,7 +13,6 @@ public class CambioEstado(DateTime fechaHoraInicio, Estado estado, List<MotivoFu
 
     public bool EsEstadoActual()
     {
-        var fechaActual = DateTime.Now;
-        return fechaActual >= FechaHoraInicio && FechaHoraFin == null;
+        return FechaHoraFin == null;
     }
 }
