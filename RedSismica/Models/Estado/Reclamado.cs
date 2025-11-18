@@ -2,8 +2,9 @@
 
 public class Reclamado : EstadoSismografo
 {
-    public Reclamado() : base("Reclamado")
+    public Reclamado()
     {
+        Nombre = "Reclamado";
     }
 
     public override bool EsReclamado() => true;

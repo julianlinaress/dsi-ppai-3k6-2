@@ -19,7 +19,7 @@ public class EstadoRepository
     private static Estado MaterializeOrden(SqliteDataReader reader)
     {
         var nombre = reader.GetString(reader.GetOrdinal("Nombre"));
-        return new Estado(nombre);
+        return new Estado(nombre, "Orden de Inspección");
     }
 
     private static EstadoSismografo MaterializeSismografo(SqliteDataReader reader)
@@ -33,7 +33,7 @@ public class EstadoRepository
             "En Instalación" => new EnInstalacion(),
             "Reclamado" => new Reclamado(),
             "En Línea" => new EnLinea(),
-            _ => new EstadoSismografoGenerico(nombre)
+            _ => throw new InvalidOperationException($"Estado de sismógrafo desconocido: {nombre}")
         };
     }
 

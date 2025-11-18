@@ -9,12 +9,7 @@ namespace RedSismica.Models;
 /// </summary>
 public abstract class EstadoSismografo
 {
-    protected EstadoSismografo(string nombre)
-    {
-        Nombre = nombre;
-    }
-
-    public string Nombre { get; protected set; }
+    public string Nombre { get; protected set; } = string.Empty;
 
     public virtual bool EsFueraDeServicio() => false;
     public virtual bool EsInhabilitado() => false;
@@ -29,6 +24,34 @@ public abstract class EstadoSismografo
         DateTime fechaYHora,
         Sismografo self,
         List<CambioEstado> cambiosDeEstado)
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+        public virtual void Habilitar()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void AsignarProyectoIns()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void ComenzarInstalacion()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void Reclamar()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void Reanudar()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void Conectar()
+    {
+        throw new NotImplementedException("Método no implementado para este estado.");
+    }
+    public virtual void Inhabilitar()
     {
         throw new NotImplementedException("Método no implementado para este estado.");
     }

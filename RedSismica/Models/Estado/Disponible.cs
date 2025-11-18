@@ -2,8 +2,9 @@
 
 public class Disponible : EstadoSismografo
 {
-    public Disponible() : base("Disponible")
+    public Disponible()
     {
+        Nombre = "Disponible";
     }
 
     public override bool EsDisponible() => true;

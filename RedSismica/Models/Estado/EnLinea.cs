@@ -2,8 +2,9 @@
 
 public class EnLinea : EstadoSismografo
 {
-    public EnLinea() : base("En Línea")
+    public EnLinea()
     {
+        Nombre = "En Línea";
     }
 
     public override bool EsEnLinea() => true;

@@ -5,8 +5,9 @@ namespace RedSismica.Models;
 
 public class Inhabilitado : EstadoSismografo
 {
-    public Inhabilitado() : base("Inhabilitado")
+    public Inhabilitado()
     {
+        Nombre = "Inhabilitado";
     }
 
     public override bool EsInhabilitado() => true;
