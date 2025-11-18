@@ -40,7 +40,10 @@ public class SismografoRepository
         {
             var estadoId = reader.GetInt32(estadoIdOrdinal);
             var estado = _estadoRepository.GetSismografoById(estadoId);
-            sismografo.Estado = estado;
+            if (estado != null)
+            {
+                sismografo.Estado = estado;
+            }
         }
         
         return sismografo;
@@ -77,8 +80,10 @@ public class SismografoRepository
             if (estado != null)
             {
                 var motivos = LoadMotivosFueraServicio(cambioEstadoId);
-                var cambio = new CambioEstado(fechaInicio, estado, motivos);
-                cambio.FechaHoraFin = fechaFin;
+                var cambio = new CambioEstado(fechaInicio, estado, motivos)
+                {
+                    FechaHoraFin = fechaFin
+                };
                 cambios.Add(cambio);
             }
         }

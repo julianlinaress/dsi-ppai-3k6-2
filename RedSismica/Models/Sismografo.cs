@@ -12,7 +12,7 @@ public class Sismografo(string nombre)
     public int IdentificadorSismografo { get; private set; } = _contador++;
     public List<CambioEstado> CambioEstado { get; set; } = [];
     
-    public EstadoSismografo? Estado { get; set; }
+    public EstadoSismografo Estado { get; set; } = new Inhabilitado();
 
     public void PonerSismografoEnFueraDeServicio(            
             Empleado responsable,
@@ -20,7 +20,7 @@ public class Sismografo(string nombre)
             DateTime fechaYHora
         )
     {
-        Estado?.FueraDeServicio(
+        Estado.FueraDeServicio(
             responsable: responsable,
             motivos: motivos,
             fechaYHora: fechaYHora,
@@ -35,7 +35,7 @@ public class Sismografo(string nombre)
         {
             Identificador = IdentificadorSismografo,
             Nombre = Nombre,
-            Estado = Estado?.Nombre ?? "Sin estado",
+            Estado = Estado.Nombre,
             SismografoCompleto = this
         };
     }
