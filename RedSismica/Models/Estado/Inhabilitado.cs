@@ -21,10 +21,7 @@ public class Inhabilitado : EstadoSismografo
     {
         // Finalizar el cambio de estado actual
         var cambioActual = cambiosDeEstado.Find(c => c.EsEstadoActual());
-        if (cambioActual != null)
-        {
-            cambioActual.FechaHoraFin = fechaYHora;
-        }
+        cambioActual?.SetFechaHoraFin(fechaYHora);
 
         // Crear nuevo estado
         var nuevoEstado = CrearNuevoEstado();
@@ -33,7 +30,7 @@ public class Inhabilitado : EstadoSismografo
         var nuevoCambio = CrearNuevoCambioDeEstado(nuevoEstado, fechaYHora, motivos, responsable);
         
         // Actualizar sismógrafo
-        self.Estado = nuevoEstado;
+        self.SetEstado(nuevoEstado);
         cambiosDeEstado.Add(nuevoCambio);
     }
 

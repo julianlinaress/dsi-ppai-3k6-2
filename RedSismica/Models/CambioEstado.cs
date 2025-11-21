@@ -15,4 +15,9 @@ public class CambioEstado(DateTime fechaHoraInicio, EstadoSismografo estado, Lis
     {
         return FechaHoraFin == null;
     }
+
+    internal void SetFechaHoraFin(DateTime fechaYHora)
+    {
+        FechaHoraFin = fechaYHora;
+    }
 }

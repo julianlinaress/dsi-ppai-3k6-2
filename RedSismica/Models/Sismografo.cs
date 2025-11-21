@@ -39,4 +39,9 @@ public class Sismografo(string nombre)
             SismografoCompleto = this
         };
     }
+
+    public void SetEstado(EstadoSismografo nuevoEstado)
+    {
+        Estado = nuevoEstado;
+    }
 }
